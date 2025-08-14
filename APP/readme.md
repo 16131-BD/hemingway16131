@@ -1,0 +1,1 @@
+Aplicativo Web - Para simular el anterior con los requerimientos iniciales.
