@@ -1,3 +1,90 @@
+-- SELECCIONAR PERSONS
+DROP FUNCTION IF EXISTS public.fx_sel_persons(JSONB);
+CREATE FUNCTION public.fx_sel_persons(JSONB)
+    RETURNS TABLE (
+        id                INT,
+        code              VARCHAR,
+        father_last_name  VARCHAR,
+        mother_last_name  VARCHAR,
+        names             VARCHAR,
+        gender            VARCHAR,
+        created_at        TIMESTAMP WITH TIME ZONE,
+        created_by        INT,
+        updated_at        TIMESTAMP WITH TIME ZONE
+    )
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+BEGIN
+    RETURN QUERY
+    WITH filtros AS (
+        SELECT 
+            x.id,
+            x.code,
+            x.father_last_name,
+            x.mother_last_name,
+            x.names,
+            x.gender,
+            x.created_by,
+            x.created_at
+        FROM JSONB_TO_RECORDSET(COALESCE(p_json_data, '[]'::JSONB)) AS x(
+            id                INT,
+            code              VARCHAR(25),
+            father_last_name  VARCHAR(500),
+            mother_last_name  VARCHAR(500),
+            names             VARCHAR(500),
+            gender            VARCHAR(2),
+            created_by        INT,
+            created_at        TIMESTAMP WITH TIME ZONE
+        )
+    )
+    SELECT 
+        p.id,
+        p.code,
+        p.father_last_name,
+        p.mother_last_name,
+        p.names,
+        p.gender,
+        p.created_at,
+        p.created_by,
+        p.updated_at
+    FROM persons p
+    LEFT JOIN filtros f ON TRUE
+    WHERE
+        (f.id IS NULL OR p.id = f.id)
+        AND (f.code IS NULL OR p.code ILIKE '%' || f.code || '%')
+        AND (f.father_last_name IS NULL OR p.father_last_name ILIKE '%' || f.father_last_name || '%')
+        AND (f.mother_last_name IS NULL OR p.mother_last_name ILIKE '%' || f.mother_last_name || '%')
+        AND (f.names IS NULL OR p.names ILIKE '%' || f.names || '%')
+        AND (f.gender IS NULL OR p.gender = f.gender)
+        AND (f.created_by IS NULL OR p.created_by = f.created_by)
+        AND (f.created_at IS NULL OR DATE(p.created_at) = DATE(f.created_at));
+
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_sel_persons(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Consultar registros en persons con filtros opcionales enviados en formato JSONB
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.14
+* SISTEMA / MODULO : [Sistema] / Personas
+* SINTAXIS DE EJEMPLO:
+* -- Todos los registros
+* SELECT * FROM public.fx_sel_persons(NULL);
+*
+* -- Filtrar por código y género
+* SELECT * FROM public.fx_sel_persons(
+*     ''[{"code":"P001","gender":"M"}]''
+* );
+***************************************************************************************************/';
+
+
 DROP FUNCTION IF EXISTS public.fx_ins_persons(JSONB);
 CREATE FUNCTION public.fx_ins_persons(JSONB)
     RETURNS BOOLEAN
@@ -205,10 +292,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_ins_types(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_types(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_types(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_ins_types(JSONB)
 IS '
 /***************************************************************************************************
@@ -270,10 +353,6 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
-
-ALTER FUNCTION public.fx_upd_types(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_types(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_types(JSONB) FROM public;
 
 COMMENT ON FUNCTION public.fx_upd_types(JSONB)
 IS '
@@ -353,10 +432,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_ins_periods(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_periods(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_periods(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_ins_periods(JSONB)
 IS '
 /***************************************************************************************************
@@ -418,10 +493,6 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
-
-ALTER FUNCTION public.fx_upd_periods(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_periods(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_periods(JSONB) FROM public;
 
 COMMENT ON FUNCTION public.fx_upd_periods(JSONB)
 IS '
@@ -500,10 +571,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_ins_courses(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_courses(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_courses(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_ins_courses(JSONB)
 IS '
 /***************************************************************************************************
@@ -565,10 +632,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_upd_courses(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_courses(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_courses(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_upd_courses(JSONB)
 IS '
 /***************************************************************************************************
@@ -588,6 +651,82 @@ IS '
 ***************************************************************************************************/';
 
 -- TABLA ESTUDIANTES
+
+DROP FUNCTION IF EXISTS public.fx_sel_students(JSONB);
+CREATE FUNCTION public.fx_sel_students(JSONB)
+    RETURNS TABLE (
+        id              INT,
+        code			VARCHAR(25),
+        person_id       INT,
+        father_last_name	VARCHAR(500),
+        mother_last_name	VARCHAR(500),
+        names			VARCHAR(500),
+        gender			VARCHAR(500),
+        status          INT,
+        created_at      TIMESTAMP WITH TIME ZONE,
+        created_by      INT,
+        updated_at      TIMESTAMP WITH TIME ZONE
+    )
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+    v_person_id INT;
+    v_status    INT;
+BEGIN
+    -- Extraer filtros desde el JSONB
+    SELECT  
+        x.person_id,
+        x.status
+    INTO
+        v_person_id,
+        v_status
+    FROM JSONB_TO_RECORD(p_json_data) AS x(
+        person_id INT,
+        status    INT
+    );
+
+    RETURN QUERY
+    SELECT 
+        s.id,
+		p.code,
+        s.person_id,
+		p.father_last_name,
+		p.mother_last_name,
+		p.names,
+		t.name as gender,
+        s.status,
+        s.created_at,
+        s.created_by,
+        s.updated_at
+    FROM students as s
+		INNER JOIN persons as p
+		on s.person_id = p.id
+		INNER JOIN types as t
+		on p.gender = t.code
+		and t.type = 'GENERO'
+    WHERE (v_person_id IS NULL OR s.person_id = v_person_id)
+      AND (v_status IS NULL OR s.status = v_status);
+
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_sel_students(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Consultar registros de students con filtros opcionales
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.14
+* SISTEMA / MODULO : [Sistema] / Académico
+* SINTAXIS DE EJEMPLO:
+* SELECT * FROM public.fx_sel_students(
+*     ''{"person_id": 10, "status": 1}''
+* );
+***************************************************************************************************/';
+
 
 DROP FUNCTION IF EXISTS public.fx_ins_students(JSONB);
 CREATE FUNCTION public.fx_ins_students(JSONB)
@@ -634,10 +773,6 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
-
-ALTER FUNCTION public.fx_ins_students(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_students(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_students(JSONB) FROM public;
 
 COMMENT ON FUNCTION public.fx_ins_students(JSONB)
 IS '
@@ -693,10 +828,6 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
-
-ALTER FUNCTION public.fx_upd_students(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_students(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_students(JSONB) FROM public;
 
 COMMENT ON FUNCTION public.fx_upd_students(JSONB)
 IS '
@@ -768,10 +899,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_ins_attendances(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_attendances(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_attendances(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_ins_attendances(JSONB)
 IS '
 /***************************************************************************************************
@@ -829,10 +956,6 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
-
-ALTER FUNCTION public.fx_upd_attendances(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_attendances(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_attendances(JSONB) FROM public;
 
 COMMENT ON FUNCTION public.fx_upd_attendances(JSONB)
 IS '
@@ -923,10 +1046,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_ins_descriptive_conclusions(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_descriptive_conclusions(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_descriptive_conclusions(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_ins_descriptive_conclusions(JSONB)
 IS '
 /***************************************************************************************************
@@ -1007,10 +1126,6 @@ END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
-
-ALTER FUNCTION public.fx_upd_descriptive_conclusions(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_descriptive_conclusions(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_descriptive_conclusions(JSONB) FROM public;
 
 COMMENT ON FUNCTION public.fx_upd_descriptive_conclusions(JSONB)
 IS '
@@ -1105,10 +1220,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_ins_scores(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_ins_scores(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_ins_scores(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_ins_scores(JSONB)
 IS '
 /***************************************************************************************************
@@ -1184,10 +1295,6 @@ $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
 COST 1000;
 
-ALTER FUNCTION public.fx_upd_scores(JSONB) OWNER TO rgensoftia;
-GRANT EXECUTE ON FUNCTION public.fx_upd_scores(JSONB) TO rgensoftia;
-REVOKE ALL ON FUNCTION public.fx_upd_scores(JSONB) FROM public;
-
 COMMENT ON FUNCTION public.fx_upd_scores(JSONB)
 IS '
 /***************************************************************************************************
@@ -1205,3 +1312,5 @@ IS '
 *   ]''
 * );
 ***************************************************************************************************/';
+
+

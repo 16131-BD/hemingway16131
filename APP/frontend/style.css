@@ -1,0 +1,268 @@
+ body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background-color: #f8f9fa;
+}
+
+.sidebar {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2c3e50 0%, #3498db 100%);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+}
+
+.logo-section {
+  padding: 20px;
+  text-align: center;
+  border-bottom: 1px solid rgba(255,255,255,0.1);
+  margin-bottom: 20px;
+}
+
+.logo-section img {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  border: 3px solid #fff;
+  margin-bottom: 15px;
+}
+
+.school-name {
+  color: white;
+  font-size: 16px;
+  font-weight: bold;
+  line-height: 1.2;
+  margin-bottom: 10px;
+}
+
+.school-motto {
+  color: #ecf0f1;
+  font-size: 12px;
+  font-style: italic;
+}
+
+.nav-section {
+  padding: 0 20px;
+}
+
+.nav-title {
+  color: #ecf0f1;
+  font-size: 14px;
+  font-weight: 600;
+  margin-bottom: 15px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+
+.nav-item {
+  margin-bottom: 8px;
+}
+
+.nav-btn {
+  width: 100%;
+  padding: 12px 16px;
+  border: none;
+  border-radius: 8px;
+  background: rgba(255,255,255,0.1);
+  color: white;
+  text-align: left;
+  transition: all 0.3s ease;
+  font-size: 14px;
+}
+
+.nav-btn:hover {
+  background: rgba(255,255,255,0.2);
+  transform: translateX(5px);
+  color: white;
+}
+
+.nav-btn i {
+  margin-right: 10px;
+  width: 16px;
+}
+
+.main-content {
+  padding: 30px;
+}
+
+.header-section {
+  background: white;
+  padding: 25px;
+  border-radius: 15px;
+  box-shadow: 0 2px 20px rgba(0,0,0,0.08);
+  margin-bottom: 30px;
+  border-left: 5px solid #3498db;
+}
+
+.content-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 20px;
+}
+
+.module-card {
+  background: white;
+  padding: 20px;
+  border-radius: 12px;
+  box-shadow: 0 2px 15px rgba(0,0,0,0.08);
+  transition: all 0.3s ease;
+  cursor: pointer;
+  border-top: 4px solid;
+}
+
+.module-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 5px 25px rgba(0,0,0,0.15);
+}
+
+.module-icon {
+  font-size: 24px;
+  margin-bottom: 15px;
+  display: block;
+}
+
+.module-title {
+  font-size: 14px;
+  font-weight: 600;
+  margin: 0;
+  text-align: center;
+}
+
+/* Colores específicos para cada módulo */
+.aritmetica { border-top-color: #90EE90; color: #2d5016; }
+.algebra { border-top-color: #ADD8E6; color: #1e4a5c; }
+.geometria { border-top-color: #F0E68C; color: #5c5016; }
+.estadistica { border-top-color: #D3D3D3; color: #4a4a4a; }
+.raz-matematico { border-top-color: #DEB887; color: #5c4016; }
+.comunicacion { border-top-color: #B0C4DE; color: #1e2d5c; }
+.raz-verbal { border-top-color: #C0C0C0; color: #404040; }
+.plan-lector { border-top-color: #90EE90; color: #2d5016; }
+.ciencia-tecnologia { border-top-color: #87CEEB; color: #1e4a5c; }
+.personal-social { border-top-color: #DA70D6; color: #5c1e54; }
+.tutoria { border-top-color: #DAA520; color: #5c4016; }
+.religion { border-top-color: #7FFFD4; color: #1e5c4a; }
+.arte-cultura { border-top-color: #CD853F; color: #5c2d16; }
+.educacion-fisica { border-top-color: #FFFF00; color: #5c5c00; }
+.ingles { border-top-color: #F0E68C; color: #5c5016; }
+.taller { border-top-color: #90EE90; color: #2d5016; }
+
+.months-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 15px;
+  margin-top: 20px;
+}
+
+.month-card {
+  background: white;
+  padding: 15px;
+  border-radius: 10px;
+  text-align: center;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+}
+
+.month-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* Colores para los meses */
+.marzo { background-color: #90EE90; color: #2d5016; }
+.abril { background-color: #ADD8E6; color: #1e4a5c; }
+.mayo { background-color: #F0E68C; color: #5c5016; }
+.junio { background-color: #B0C4DE; color: #1e2d5c; }
+.julio { background-color: #DEB887; color: #5c4016; }
+.agosto { background-color: #87CEEB; color: #1e4a5c; }
+.septiembre { background-color: #C0C0C0; color: #404040; }
+.octubre { background-color: #A9A9A9; color: #2a2a2a; }
+.noviembre { background-color: #90EE90; color: #2d5016; }
+.diciembre { background-color: #87CEEB; color: #1e4a5c; }
+
+.sidebar-form {
+  position: fixed;
+  top: 0;
+  right: -600px;
+  width: 600px;
+  height: 100vh;
+  background: white;
+  z-index: 1000;
+  overflow-y: auto;
+}
+
+.sidebar-form.open {
+  right: 0;
+}
+
+.sidebar-content {
+  padding: 1.5rem;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: #000000ab;
+  z-index: 999;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.overlay.active {
+  opacity: .3;
+  visibility: visible;
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: #666666;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.modal-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.modal-container {
+  background: white;
+  border-radius: 12px;
+  max-width: 400px;
+  width: 90%;
+  padding: 2rem 1.5rem 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.modal-content {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+@media (max-width: 768px) {
+  .sidebar {
+      min-height: auto;
+  }
+  
+  .content-grid {
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+      gap: 15px;
+  }
+  
+  .main-content {
+      padding: 20px;
+  }
+}
+

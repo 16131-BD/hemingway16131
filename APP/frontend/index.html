@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="hemingwayApp">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Document</title>
+  <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css" integrity="sha512-DxV+EoADOkOygM4IR9yXP8Sb2qwgidEmeqAEmDKIOfPRQZOWbXCzLC6vjbZyy0vPisbH2SyW27+ddLVCN+OMzQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+  <script src="app.js"></script>
+</head>
+
+<body ng-controller="mainController">
+  <div class="container-fluid" ng-init="init()">
+    <div class="row">
+      <!-- Sidebar -->
+      <div class="col-md-3 col-lg-2 sidebar">
+        <div class="logo-section">
+          <div
+            style="width: 80px; height: 80px; background: #fff; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+            <i class="fas fa-graduation-cap" style="font-size: 30px; color: #2c3e50;"></i>
+          </div>
+          <div class="school-name">INSTITUCIÓN EDUCATIVA PRIVADA<br>ERNEST HEMINGWAY</div>
+          <div class="school-motto">Los preparamos para ser Excelentes</div>
+        </div>
+
+        <div class="nav-section">
+          <div class="nav-title">Registros Institucionales</div>
+
+          <div class="nav-item" ng-repeat="m in menu">
+            <button class="nav-btn" ng-click="selectItem(m)">
+              <i class="{{m.icon}}"></i>
+              {{m.name}}
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Main Content -->
+      <div class="col-md-9 col-lg-10 main-content" ng-if="itemSelected">
+        <!-- Header -->
+        <div class="header-section">
+          <h2 class="mb-0"><i class="{{itemSelected.icon}} me-3"></i>{{itemSelected.name}}</h2>
+          <p class="mb-0 mt-2 text-muted">{{itemSelected.description}}</p>
+        </div>
+        
+        <!-- Content Sections -->
+        <div class="container-fluid">
+          <div class="form-row" ng-if="itemSelected.id === 'config'">
+            Contenido de Configuración
+          </div>
+          <div class="form-row" ng-if="itemSelected.id === 'scores'">
+            <div id="notas-section">
+              <div class="row">
+                <div class="col-12">
+                  <h4 class="mb-4"><i class="fas fa-book me-2"></i>Materias Disponibles</h4>
+                  <div class="content-grid">
+                    <div class="module-card aritmetica" onclick="selectModule('Aritmética')">
+                      <i class="fas fa-calculator module-icon"></i>
+                      <p class="module-title">Aritmética</p>
+                    </div>
+
+                    <div class="module-card algebra" onclick="selectModule('Álgebra')">
+                      <i class="fas fa-square-root-alt module-icon"></i>
+                      <p class="module-title">Álgebra</p>
+                    </div>
+
+                    <div class="module-card geometria" onclick="selectModule('Geometría')">
+                      <i class="fas fa-shapes module-icon"></i>
+                      <p class="module-title">Geometría</p>
+                    </div>
+
+                    <div class="module-card estadistica" onclick="selectModule('Estadística')">
+                      <i class="fas fa-chart-bar module-icon"></i>
+                      <p class="module-title">Estadística</p>
+                    </div>
+
+                    <div class="module-card raz-matematico" onclick="selectModule('Raz. Matemático')">
+                      <i class="fas fa-brain module-icon"></i>
+                      <p class="module-title">Raz. Matemático</p>
+                    </div>
+
+                    <div class="module-card comunicacion" onclick="selectModule('Comunicación')">
+                      <i class="fas fa-comments module-icon"></i>
+                      <p class="module-title">Comunicación</p>
+                    </div>
+
+                    <div class="module-card raz-verbal" onclick="selectModule('Raz. Verbal')">
+                      <i class="fas fa-quote-left module-icon"></i>
+                      <p class="module-title">Raz. Verbal</p>
+                    </div>
+
+                    <div class="module-card plan-lector" onclick="selectModule('Plan Lector')">
+                      <i class="fas fa-book-open module-icon"></i>
+                      <p class="module-title">Plan Lector</p>
+                    </div>
+
+                    <div class="module-card ciencia-tecnologia" onclick="selectModule('Ciencia y Tecnología')">
+                      <i class="fas fa-microscope module-icon"></i>
+                      <p class="module-title">Ciencia y Tecnología</p>
+                    </div>
+
+                    <div class="module-card personal-social" onclick="selectModule('Personal Social')">
+                      <i class="fas fa-users module-icon"></i>
+                      <p class="module-title">Personal Social</p>
+                    </div>
+
+                    <div class="module-card tutoria" onclick="selectModule('Tutoría')">
+                      <i class="fas fa-chalkboard-teacher module-icon"></i>
+                      <p class="module-title">Tutoría</p>
+                    </div>
+
+                    <div class="module-card religion" onclick="selectModule('Religión')">
+                      <i class="fas fa-pray module-icon"></i>
+                      <p class="module-title">Religión</p>
+                    </div>
+
+                    <div class="module-card arte-cultura" onclick="selectModule('Arte y Cultura')">
+                      <i class="fas fa-palette module-icon"></i>
+                      <p class="module-title">Arte y Cultura</p>
+                    </div>
+
+                    <div class="module-card educacion-fisica" onclick="selectModule('Educación Física')">
+                      <i class="fas fa-running module-icon"></i>
+                      <p class="module-title">Educación Física</p>
+                    </div>
+
+                    <div class="module-card ingles" onclick="selectModule('Inglés')">
+                      <i class="fas fa-language module-icon"></i>
+                      <p class="module-title">Inglés</p>
+                    </div>
+
+                    <div class="module-card taller" onclick="selectModule('Taller')">
+                      <i class="fas fa-tools module-icon"></i>
+                      <p class="module-title">Taller</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div class="row mt-5">
+                <div class="col-12">
+                  <h4 class="mb-4"><i class="fas fa-calendar me-2"></i>Períodos del Año Escolar</h4>
+                  <div class="months-grid">
+                    <div class="month-card marzo" onclick="selectPeriod('Marzo')">Marzo</div>
+                    <div class="month-card abril" onclick="selectPeriod('Abril')">Abril</div>
+                    <div class="month-card mayo" onclick="selectPeriod('Mayo')">Mayo</div>
+                    <div class="month-card junio" onclick="selectPeriod('Junio')">Junio</div>
+                    <div class="month-card julio" onclick="selectPeriod('Julio')">Julio</div>
+                    <div class="month-card agosto" onclick="selectPeriod('Agosto')">Agosto</div>
+                    <div class="month-card septiembre" onclick="selectPeriod('Septiembre')">Septiembre</div>
+                    <div class="month-card octubre" onclick="selectPeriod('Octubre')">Octubre</div>
+                    <div class="month-card noviembre" onclick="selectPeriod('Noviembre')">Noviembre</div>
+                    <div class="month-card diciembre" onclick="selectPeriod('Diciembre')">Diciembre</div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="form-row" ng-if="itemSelected.id === 'students'">
+            <div class="col-12">
+              <div class="form-row">
+                <div class="col-4">
+                  <div class="card">
+                    <div class="card-body text-center">
+                      <h2>{{allStudents.length}}</h2>
+                      Estudiantes
+                    </div>
+                  </div>
+                </div>
+                <div class="row">
+                  <div class="col-4"></div>
+                  <div class="col-4"></div>
+                  <div class="col-8 mt-2 mb-2">
+                    <div class="input-group">
+                      <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                      <input type="text" class="form-control" placeholder="BUSCAR POR TEXTO" aria-label="TEXTO" ng-model="filter.students.text" aria-describedby="basic-addon1">
+                    </div>
+                  </div>
+                  <div class="col-4 mt-2 mb-2 text-end">
+                    <button class="btn btn-primary" ng-click="toggleSidebar('student')">
+                      <i class="fas fa-plus me-1"></i>Agregar Estudiante
+                    </button>
+                  </div>
+                  <div class="col-12">
+                    <ul class="list-group">
+                      <li class="list-group-item list-group-item-secondary">
+                        <div class="row">
+                          <div class="col"><strong>Código</strong></div>
+                          <div class="col"><strong>Estudiante</strong></div>
+                          <div class="col"><strong>Género</strong></div>
+                          <div class="col"><strong>Fecha de Creación</strong></div>
+                          <div class="col text-end"><strong>Acciones</strong></div>
+                        </div>
+                      </li>
+                      <li class="list-group-item" ng-repeat="s in allStudents">
+                        <div class="row">
+                          <div class="col">{{s.code}}</div>
+                          <div class="col">{{s.father_last_name}} {{s.mother_last_name}}, {{s.names}}</div>
+                          <div class="col">{{s.gender}}</div>
+                          <div class="col">{{s.created_at | date:'dd/MM/yyyy'}}</div>
+                          <div class="col">
+  
+                          </div>
+                        </div>
+                        
+                      </li>
+                    </ul>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="form-row" ng-if="itemSelected.id === 'descriptive_conclusions'">
+            descriptive_conclusions
+          </div>
+          <div class="form-row" ng-if="itemSelected.id === 'report_card'">
+            Boleta de notas
+          </div>
+        </div>
+        
+
+      </div>
+    </div>
+
+    <div class="overlay" ng-class="{'active': showForm == true}" ng-click="toggleSidebar()"></div>
+  
+    <!-- FORMULARIO - NUEVO REGISTRO -->
+    <div class="sidebar-form" id="sidebar-form" ng-class="{'open': showForm == true}">
+      <div class="sidebar-header">
+          <div class="row ps-3 pt-3 pe-3 m-0">
+            <div class="col-8">
+              <strong ng-if="newItem.typeSelected === 'student'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Estudiante</strong>
+            </div>
+            <div class="col-4 text-end">
+              <button class="btn btn-sm btn-danger" ng-click="toggleSidebar()">
+                <i class="fas fa-times me-1"></i>Cancelar
+              </button>
+            </div>
+          </div>
+      </div>
+      <hr>
+      <div class="sidebar-content">
+        <form name="studentForm" ng-if="newItem.typeSelected === 'student'">
+          <div class="row">
+            <div class="col-6">
+              <label for="code">Código</label>
+              <input type="text" name="code" ng-model="newItem.code" maxlength="25" class="form-control" required>
+            </div>
+            <div class="col-6">
+              <label for="gender">Género</label>
+              <select name="gender" ng-model="newItem.gender" class="form-select">
+                <option ng-value="undefined">--SELECCIONE--</option>
+                <option ng-repeat="g in genders" ng-value="g.code">{{g.name}}</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label for="father_last_name">Apellido Paterno</label>
+              <input type="text" name="father_last_name" ng-model="newItem.father_last_name" maxlength="500" class="form-control" required>
+            </div>
+            <div class="col-6">
+              <label for="mother_last_name">Apellido Materno</label>
+              <input type="text" name="mother_last_name" ng-model="newItem.mother_last_name" maxlength="500" class="form-control" required>
+            </div>
+            <div class="col-12">
+              <label for="names">Nombres</label>
+              <input type="text" name="names" ng-model="newItem.names" class="form-control" maxlength="500" required>
+            </div>
+            <div class="col-12">
+              <label for="status">Estado</label>
+              <select name="status" ng-model="newItem.status" class="form-select" required>
+                <option ng-value="undefined">--SELECCIONE--</option>
+                <option ng-repeat="s in studentStatus" ng-value="s.code">{{s.name}}</option>
+              </select>
+            </div>
+            <div class="col-12 mt-3 text-center">
+              <button class="btn btn-danger me-5">
+                <i class="fas fa-times me-1"></i>Cancelar
+              </button>
+              <button class="btn btn-primary" ng-disabled="studentForm.$invalid">
+                <i class="fas fa-save me-1"></i>Guardar
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
