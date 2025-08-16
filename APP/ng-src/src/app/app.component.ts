@@ -39,17 +39,24 @@ export class AppComponent implements OnInit {
       selected: false
     },
     {
-      id: "scores",
-      icon: "fas fa-star",
-      name: "Registro de Notas",
-      description: "Seleccione una materia o período para gestionar las calificaciones",
-      selected: false
-    },
-    {
       id: "students",
       icon: "fas fa-users",
       name: "Registro de Estudiantes",
       description: "Administre la información de los estudiantes",
+      selected: false
+    },
+    {
+      id: "enrollment",
+      icon: "fas fa-list-check",
+      name: "Matricula",
+      description: "Administre la Estudiantes por Periodo y Grado",
+      selected: false
+    },
+    {
+      id: "scores",
+      icon: "fas fa-star",
+      name: "Registro de Notas",
+      description: "Seleccione una materia o período para gestionar las calificaciones",
       selected: false
     },
     {
