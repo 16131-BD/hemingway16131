@@ -147,7 +147,7 @@
         <div class="form-row" *ngIf="itemSelected.id === 'academic_period'">
           <div class="card">
             <div class="card-header">
-              Periodos Academicos
+              Periodos Académicos
             </div>
             <div class="card-body">
               <ul class="list-group-item">
@@ -157,7 +157,7 @@
                 </div>
               </ul>
               <ul class="list-group">
-                <li class="list-group-item list-group-item-secondary text-primary">
+                <li class="list-group-item list-group-item-secondary text-primary" *ngIf="academicPeriods.length">
                   <div class="row">
                     <div class="col">
                       Año
@@ -230,6 +230,165 @@
                   </button>
                 </li>
               </ul>
+            </div>
+          </div>
+        </div>
+        <div class="form-row" *ngIf="itemSelected.id === 'students'">
+          <div class="col-12">
+            <div class="form-row">
+              <div class="col-4">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h2>{{allStudents.length}}</h2>
+                    Estudiantes
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4"></div>
+                <div class="col-8 mt-2 mb-2">
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="BUSCAR POR TEXTO" aria-label="TEXTO" [(ngModel)]="filter.students.text" aria-describedby="basic-addon1">
+                  </div>
+                </div>
+                <div class="col-4 mt-2 mb-2 text-end">
+                  <button class="btn btn-primary" (click)="toggleSidebar('student')">
+                    <i class="fas fa-plus me-1"></i>Agregar Estudiante
+                  </button>
+                </div>
+                <div class="col-12">
+                  <ul class="list-group">
+                    <li class="list-group-item list-group-item-secondary">
+                      <div class="row">
+                        <div class="col"><strong>Código</strong></div>
+                        <div class="col"><strong>Estudiante</strong></div>
+                        <div class="col"><strong>Género</strong></div>
+                        <div class="col"><strong>Fecha de Creación</strong></div>
+                        <div class="col text-end"><strong>Acciones</strong></div>
+                      </div>
+                    </li>
+                    <li class="list-group-item" *ngFor="let s of allStudents">
+                      <div class="row">
+                        <div class="col">{{s.code}}</div>
+                        <div class="col">{{s.father_last_name}} {{s.mother_last_name}}, {{s.names}}</div>
+                        <div class="col">{{s.gender}}</div>
+                        <div class="col">{{s.created_at | date:'dd/MM/yyyy'}}</div>
+                        <div class="col text-end">
+                          <button class="btn btn-sm btn-light text-primary rounded-circle me-2">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-sm btn-danger rounded-circle">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row" *ngIf="itemSelected.id === 'enrollment'">
+          <div class="col-12" *ngIf="!academicPeriods.length">
+            <div class="card bg-light text-danger" *ngIf="!currentAcademicPeriod">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12 text-center">
+                    <i class="fas fa-info-circle fa-3x mb-2"></i> <br> No se tiene registrado ningun <br> <strong>PERIODO ACADEMICO</strong>. 
+                    <br> <br>
+                    Para crear haga click en la opción <strong>Periodos Académicos</strong>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="col-12" *ngIf="academicPeriods.length">
+            <div class="card bg-light text-danger" *ngIf="!currentAcademicPeriod">
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12 text-center">
+                    <i class="fas fa-info-circle fa-3x mb-2"></i> <br> No se tiene <strong>PERIODO ACADEMICO ACTUAL</strong>. Para asignar uno <br> <br>
+                    <button class="btn btn-sm btn-primary" (click)="toggleSidebar('available_academic_period')">
+                      Haz click aqui
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div class="card" *ngIf="currentAcademicPeriod">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col-5">
+                    Matricula de Estudiantes
+                  </div>
+                  <div class="col-5">
+                    <span class="badge bg-primary">
+                      PERIODO ACADEMICO {{currentAcademicPeriod.year}}
+                    </span>
+                  </div>
+                  <div class="col-2">
+
+                  </div>
+                </div>
+              </div>
+              <div class="card-body text-center text-danger" *ngIf="!currentAcademicPeriod.grades.length">
+                <i class="fas fa-times fa-3x"></i> <br>
+                No se tiene asignado ningun grado para evaluación <br> <br>
+                <span>
+                  Habilitalos en la opción <strong>Periodos Académicos</strong> -> Periodo Academico {{currentAcademicPeriod.year}}
+                </span>
+              </div>
+              <div class="card-body" *ngIf="currentAcademicPeriod.grades.length">
+                <div class="card mb-2" *ngFor="let g of currentAcademicPeriod.grades">
+                  <div class="card-header">
+                    <div class="row">
+                      <div class="col-12">
+                        <div class="row">
+                          <div class="col-3 pt-1">
+                            {{g.abbr}} GRADO
+                          </div>
+                          <div class="col-3 pt-1">
+                            {{g.vacancies}} vacantes
+                          </div>
+                          <div class="col-3 pt-1 text-end">
+                            {{g.students.length}} matriculados
+                          </div>
+                          <div class="col-3 text-end">
+                            <button class="btn btn-sm btn-primary" (click)="toggleSidebar('enrollment_student', g)">
+                              <i class="fa fa-list-check me-1"></i>Matricular
+                            </button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="card-body" *ngIf="g.students">
+                    <div class="col-12 text-center" *ngIf="!g.students.length">
+                      <i class="fas fa-times"></i> <br>
+                      No se tiene registrado estudiantes en este grado.
+                    </div>
+                    <div class="col-12" *ngIf="g.students.length">
+                      <ul class="list-group">
+                        <li class="list-group" *ngFor="let s of g.students">
+                          <div class="row">
+                            <div class="col-8 pt-2">
+                              {{s.code}} {{s.father_last_name}} {{s.mother_last_name}}, {{s.names}}
+                            </div>
+                            <div class="col-4 text-end">
+                              <button class="btn btn-sm btn-light text-danger" (click)="toggleRetirementStudent(s)">
+                                <i class="fa fa-times me-1"></i>Retirar
+                              </button>
+                            </div>
+                          </div>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
         </div>
@@ -342,64 +501,6 @@
           </div>
         </div>
         
-        <div class="form-row" *ngIf="itemSelected.id === 'students'">
-          <div class="col-12">
-            <div class="form-row">
-              <div class="col-4">
-                <div class="card">
-                  <div class="card-body text-center">
-                    <h2>{{allStudents.length}}</h2>
-                    Estudiantes
-                  </div>
-                </div>
-              </div>
-              <div class="row">
-                <div class="col-4"></div>
-                <div class="col-4"></div>
-                <div class="col-8 mt-2 mb-2">
-                  <div class="input-group">
-                    <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
-                    <input type="text" class="form-control" placeholder="BUSCAR POR TEXTO" aria-label="TEXTO" [(ngModel)]="filter.students.text" aria-describedby="basic-addon1">
-                  </div>
-                </div>
-                <div class="col-4 mt-2 mb-2 text-end">
-                  <button class="btn btn-primary" (click)="toggleSidebar('student')">
-                    <i class="fas fa-plus me-1"></i>Agregar Estudiante
-                  </button>
-                </div>
-                <div class="col-12">
-                  <ul class="list-group">
-                    <li class="list-group-item list-group-item-secondary">
-                      <div class="row">
-                        <div class="col"><strong>Código</strong></div>
-                        <div class="col"><strong>Estudiante</strong></div>
-                        <div class="col"><strong>Género</strong></div>
-                        <div class="col"><strong>Fecha de Creación</strong></div>
-                        <div class="col text-end"><strong>Acciones</strong></div>
-                      </div>
-                    </li>
-                    <li class="list-group-item" *ngFor="let s of allStudents">
-                      <div class="row">
-                        <div class="col">{{s.code}}</div>
-                        <div class="col">{{s.father_last_name}} {{s.mother_last_name}}, {{s.names}}</div>
-                        <div class="col">{{s.gender}}</div>
-                        <div class="col">{{s.created_at | date:'dd/MM/yyyy'}}</div>
-                        <div class="col text-end">
-                          <button class="btn btn-sm btn-light text-primary rounded-circle me-2">
-                            <i class="fas fa-edit"></i>
-                          </button>
-                          <button class="btn btn-sm btn-danger rounded-circle">
-                            <i class="fas fa-trash"></i>
-                          </button>
-                        </div>
-                      </div>
-                    </li>
-                  </ul>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
 
         <div class="form-row" *ngIf="itemSelected.id === 'descriptive_conclusions'">
           descriptive_conclusions
@@ -426,6 +527,8 @@
             <strong *ngIf="newItem.typeSelected === 'period'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Periodo</strong>
             <strong *ngIf="newItem.typeSelected === 'course'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Curso</strong>
             <strong *ngIf="newItem.typeSelected === 'grade_in_academic_period'">Configuración de Periodo Académico&nbsp;Curso</strong>
+            <strong *ngIf="newItem.typeSelected === 'available_academic_period'">Habilitar Periodo Académico Actual</strong>
+            <strong *ngIf="newItem.typeSelected === 'enrollment_student'">Matricular Estudiante</strong>
           </div>
           <div class="col-4 text-end">
             <button class="btn btn-sm btn-danger" (click)="toggleSidebar(newItem.typeSelected)">
@@ -612,7 +715,70 @@
           </div>
         </div>
       </form>
-      
+      <form #availableAcademicPeriodForm="ngForm" *ngIf="newItem.typeSelected === 'available_academic_period'">
+        <div class="row">
+          <div class="col-12">
+            <ul class="list-group">
+              <li class="list-group-item hand" *ngFor="let p of academicPeriods" (click)="toggleAvailableAcademicPeriod(p)">
+                <div class="row">
+                  <div class="col-5">
+                    Periodo Académico {{p.year}} <br>
+                    {{p.period}}
+                  </div>
+                  <div class="col-5">
+                    F.I: {{p.init_date | date:'dd/MM/yyyy'}} <br>
+                    F.F: {{p.finish_date | date:'dd/MM/yyyy'}}
+                  </div>
+                  <div class="col-2 text-end pt-2">
+                    <i class="fas fa-2x fa-circle" [ngClass]="{'text-success': p.is_current, 'text-secondary': !p.is_current}"></i>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </form>
+      <form #enrollmentStudentForm="ngForm" *ngIf="newItem.typeSelected === 'enrollment_student'">
+        <div class="row">
+          <div class="col-12">
+            <div class="input-group">
+              <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+              <input type="text" name="studentToSearch" [(ngModel)]="filter.enrollment.textToSearch" class="form-control" placeholder="BUSCAR ESTUDIANTE POR TEXTO" aria-label="BUSCAR ESTUDIANTE POR" aria-describedby="basic-addon1">
+              <button class="btn btn-primary" *ngIf="filter.enrollment.textToSearch" (click)="searchStudent()">
+                Buscar
+              </button>
+            </div>
+          </div>
+          <div class="col-12 mt-3" *ngIf="studentFounds.length">
+            <ul class="list-group">
+              <li class="list-group-item" *ngFor="let s of studentFounds">
+                <div class="row">
+                  <div class="col-8 pt-1">
+                    {{s.father_last_name}} {{s.mother_last_name}} {{s.names}}
+                  </div>
+                  <div class="col-4 text-end">
+                    <button class="btn btn-sm" [ngClass]="{'btn-success': studentToEnrollment && studentToEnrollment.student_id == s.id}" (click)="selectStudentToEnrollment(s)">
+                      {{studentToEnrollment && studentToEnrollment.student_id == s.id ? 'Seleccionado' : 'Seleccionar'}}
+                    </button>
+                  </div>
+                </div>
+              </li>
+            </ul>
+          </div>
+          <div class="col-12 mt-1" *ngIf="studentToEnrollment">
+            <label for="obs">Observación</label>
+            <textarea class="form-control" name="obs" name="obs" rows="3" [(ngModel)]="studentToEnrollment.obs"></textarea>
+          </div>
+          <div class="col-12 mt-3 text-center" *ngIf="studentToEnrollment">
+            <button class="btn btn-sm btn-danger me-5" (click)="toggleSidebar(newItem.typeSelected)">
+              <i class="fas fa-times me-1"></i>Cancelar
+            </button>
+            <button class="btn btn-sm btn-primary" [disabled]="enrollmentStudentForm.invalid" (click)="enrollmentStudent()">
+              <i class="fa fa-save me-1"></i>Guardar
+            </button>
+          </div>
+        </div>
+      </form>
     </div>
   </div>
 </div>

@@ -80,11 +80,17 @@ export class AppComponent implements OnInit {
   allStudents: any[] = [];
   genders: any[] = [];
   studentStatus: any[] = [];
+  studentFounds: any[] = [];
   periods: any[] = [];
   grades: any[] = [];
   gradeInAcademicPeriods: any[] = [];
   courses: any[] = [];
+  studentsInGrade: any[] = [];
   academicPeriods: any[] = [];
+  currentAcademicPeriod: any;
+  studentToEnrollment: any;
+
+
   filter: any = {
     students: {
       text: undefined
@@ -92,6 +98,9 @@ export class AppComponent implements OnInit {
     academic_periods: {
       text: undefined
     },
+    enrollment: {
+      textoToSearch: undefined
+    }
   };
 
   showForm: boolean = false;
@@ -102,40 +111,46 @@ export class AppComponent implements OnInit {
     this.getTypes();
     this.getStudents();
     this.getPeriods();
-    this.getGrades();
     this.getCourses();
-    
+    this.getStudentsInGrade();
   }
 
   async getTypes() {
     let resultGenders = await this.MainAPI.getEntitiesBy('types', {filter: {type: "GENERO"}});
     this.genders = resultGenders.data;
     
-    let resultStudentStatus = await this.MainAPI.getEntitiesBy('types', {filter: {type: "ESTADO-DE-ESTUDIANTE"}});
+    let resultStudentStatus = await this.MainAPI.getEntitiesBy('types', {filter: {type: "ESTADO-DE-REGISTRO"}});
     this.studentStatus = resultStudentStatus.data;
   }
 
   async getPeriods() {
-    let result: any = await this.MainAPI.getEntitiesBy('periods', {filter: {}});
+    let result: any = await this.MainAPI.getEntitiesBy('periods', {filter: [{}]});
     console.log(result);
     this.periods = result.data;
   }
+
+  async getStudentsInGrade() {
+    let result: any = await this.MainAPI.getEntitiesBy('students_in_grade', {filter: [{}]});
+    this.studentsInGrade = result.data;
+    this.getGrades();
+  }
+
   
   async getGrades() {
     let result: any = await this.MainAPI.getEntitiesBy('grades', {filter: [{}]});
     this.grades = result.data;
     this.getGradesInAcademicPeriods();
-    this.getAcademicPeriods();
   }
-
+  
   async getCourses() {
     let result: any = await this.MainAPI.getEntitiesBy('courses', {filter: [{}]});
     this.courses = result.data;
   }
-
+  
   async getGradesInAcademicPeriods() {
     let result: any = await this.MainAPI.getEntitiesBy('grade_in_academic_periods', {filter: [{}]});
     this.gradeInAcademicPeriods = result.data;
+    this.getAcademicPeriods();
   }
 
   async getAcademicPeriods() {
@@ -151,10 +166,26 @@ export class AppComponent implements OnInit {
         if (gradeWithData) {
           g.vacancies = gradeWithData.vacancies;
           g.selected = true;
+          g.grade_in_academic_period_id = gradeWithData.id;
         }
       });
+      a.grades.map((g: any) => {
+        g.students = this.studentsInGrade.filter((s: any) => s.grade_in_academic_period_id === g.grade_in_academic_period_id);
+      });
     });
+    this.getInitialVarsToEnrollment();
   }
+
+  async getInitialVarsToEnrollment() {
+    let result: any = await this.MainAPI.getEntitiesBy('academic_periods', {filter: [{is_current: true}]})
+    console.log(result);
+    if (result.data.length) {
+      this.currentAcademicPeriod = this.academicPeriods.find((a: any) => a.id === result.data[0].id) ;
+      console.log(this.gradeInAcademicPeriods);
+    }
+  }
+
+ 
 
   selectItem(item: any) {
     this.itemSelected = item;
@@ -390,6 +421,85 @@ export class AppComponent implements OnInit {
     if (!grade.selected) {
       grade.vacancies = undefined;
     }
+  }
+
+  async toggleAvailableAcademicPeriod(academicPeriod: any) {
+    let lastAcademicPeriod: any = this.academicPeriods.find((a: any) => a.is_current);
+    let body: any = {};
+    if (lastAcademicPeriod) {
+      let lastCurrentAcademicPeriod: any = JSON.parse(JSON.stringify(lastAcademicPeriod));
+      lastCurrentAcademicPeriod.is_current = false;
+      body.updateds = [lastCurrentAcademicPeriod];
+      let resultLastCurrentAcademicPeriod: any = await this.MainAPI.updateEntities('academic_periods', body);
+      if (!resultLastCurrentAcademicPeriod.success) {
+        Swal.fire({
+          text: resultLastCurrentAcademicPeriod.message,
+          icon: 'error'
+        });
+        return;
+      }
+      lastAcademicPeriod.is_current = false;
+    } 
+    let newCurrentAcademicPeriod = JSON.parse(JSON.stringify(academicPeriod));
+    newCurrentAcademicPeriod.is_current = true;
+    body.updateds = [newCurrentAcademicPeriod];
+    let resultCurrentAcademicPeriod: any = await this.MainAPI.updateEntities('academic_periods', body);
+    if (!resultCurrentAcademicPeriod.success) {
+      Swal.fire({
+        text: resultCurrentAcademicPeriod.message,
+        icon: 'error'
+      });
+      return;
+    }
+    academicPeriod.is_current = true;
+    this.toggleSidebar('')
+    this.getInitialVarsToEnrollment();
+  }
+
+  toggleRetirementStudent(student: any) {
+    console.log(student);
+  }
+
+  async searchStudent() {
+    console.log(this.filter.enrollment);
+    let resultAllStudents: any = await this.MainAPI.getEntitiesBy('students', {});
+    this.studentFounds = resultAllStudents.data.filter((s: any) => `${s.code} ${s.father_last_name} ${s.mother_last_name} ${s.names}`.toLocaleLowerCase().includes(this.filter.enrollment.textToSearch));
+    console.log(this.studentFounds);
+  }
+
+  selectStudentToEnrollment(student: any) {
+    console.log(this.newItem);
+    console.log(student);
+    this.studentToEnrollment = {
+      student: student,
+      student_id: student.id
+    };
+  }
+
+  async enrollmentStudent() {
+    let body: any = {
+      news: [
+        {
+          student_id: this.studentToEnrollment.student.id,
+          grade_in_academic_period_id: this.newItem.grade_in_academic_period_id,
+          obs: this.studentToEnrollment.obs
+        }
+      ]
+    };
+    let result: any = await this.MainAPI.saveEntities('students_in_grade', body);
+    if (!result.success) {
+      Swal.fire({
+        text: result.message,
+        icon: 'error'
+      });
+      return;
+    }
+    Swal.fire({
+      text: 'Se realizo la matricula correctamente',
+      icon: 'success'
+    });
+    this.toggleSidebar(this.newItem.typeSelected);
+    this.getStudentsInGrade();
   }
 
 }

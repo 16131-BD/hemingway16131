@@ -3,6 +3,8 @@ select * from fx_ins_persons('[{"code":"PER-0001","father_last_name":"Gomez","mo
 
 -- DATOS INICIALES DE LAS DEMAS TABLAS.
 SELECT * FROM fx_ins_types('[{"code":"M","type":"GENERO","name":"Masculino","description":"Genero Masculino","status":true,"created_by":1}, {"code":"F","type":"GENERO","name":"Femenino","description":"Genero Femenino","status":true,"created_by":1}]');
+SELECT * FROM fx_ins_types('[{"code":"A","type":"ESTADO-DE-REGISTRO","name":"Activo","description":"Estado Activo","status":true}, {"code":"I","type":"ESTADO-DE-REGISTRO","name":"Inactivo","description":"Estado Inactivo","status":true}]');
+
 SELECT * FROM fx_ins_periods('[{"code":"BIM","name":"BIMESTRE","duration_in_months":2,"status":true,"created_by":1}, {"code":"TRI","name":"TRIMESTRE","duration_in_months":3,"status":true,"created_by":1}]');
 SELECT * FROM fx_ins_courses('[{"code":"MAT101","name":"Matemáticas Básicas","description":"Curso introductorio de matemáticas","status":true,"created_by":1}, {"code":"LIT201","name":"Literatura Clásica","description":"Análisis de obras clásicas","status":true,"created_by":1}, {"code":"HIS301","name":"Historia Universal","description":"Historia desde la antigüedad hasta la era moderna","status":true,"created_by":1}]');
 SELECT * FROM fx_ins_students('[{"person_id":1,"status":1,"created_by":1}, {"person_id":2,"status":1,"created_by":1}, {"person_id":3,"status":1,"created_by":1}]');

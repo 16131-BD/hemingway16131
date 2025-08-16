@@ -256,6 +256,10 @@
   resize: none;
 }
 
+.hand {
+  cursor: pointer;
+}
+
 @media (max-width: 768px) {
   .sidebar {
       min-height: auto;
