@@ -1,0 +1,357 @@
+<div class="container-fluid">
+  <div class="row">
+    <!-- Sidebar -->
+    <div class="col-md-3 col-lg-2 sidebar">
+      <div class="logo-section">
+        <div
+          style="width: 80px; height: 80px; background: #fff; border-radius: 50%; margin: 0 auto 15px; display: flex; align-items: center; justify-content: center;">
+          <i class="fas fa-graduation-cap" style="font-size: 30px; color: #2c3e50;"></i>
+        </div>
+        <div class="school-name">INSTITUCIÓN EDUCATIVA PRIVADA<br>ERNEST HEMINGWAY</div>
+        <div class="school-motto">Los preparamos para ser Excelentes</div>
+      </div>
+
+      <div class="nav-section">
+        <div class="nav-title">Registros Institucionales</div>
+
+        <div class="nav-item" *ngFor="let m of menu">
+          <button class="nav-btn" (click)="selectItem(m)">
+            <i class="{{m.icon}}"></i>
+            {{m.name}}
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="col-md-9 col-lg-10 main-content" *ngIf="itemSelected">
+      <!-- Header -->
+      <div class="header-section">
+        <h2 class="mb-0"><i class="{{itemSelected.icon}} me-3"></i>{{itemSelected.name}}</h2>
+        <p class="mb-0 mt-2 text-muted">{{itemSelected.description}}</p>
+      </div>
+      
+      <!-- Content Sections -->
+      <div class="container-fluid">
+        <div class="form-row" *ngIf="itemSelected.id === 'config'">
+          <div class="card">
+            <div class="card-header">
+              <i class="fas fa-cog me-2"></i>Administración de Variables Iniciales
+            </div>
+            <div class="card-body">
+              <div class="row">
+                <div class="col-4">
+                  <div class="card">
+                    <div class="card-header">
+                      Periodos Acádemicos
+                    </div>
+                    <div class="card-body">
+                      <ul class="list-group">
+                        <li class="list-group-item" *ngFor="let p of periods">
+                          <div class="row">
+                            <div class="col-7">
+                              <i class="fas fa-circle me-1" [ngClass]="{'text-success': p.status, 'text-danger': !p.status}" title="{{p.status ? 'ACTIVO' : 'INACTIVO'}}"></i>
+                              <span class="badge bg-primary me-2">
+                                {{p.code}}
+                              </span>
+                              {{p.name}} <small>({{p.duration_in_months}} meses)</small>
+                            </div>
+                            <div class="col-5 text-end">
+                              <button class="btn btn-sm btn-light text-success me-2" title="Configuración">
+                                <i class="fas fa-cog"></i>
+                              </button>
+                              <button class="btn btn-sm btn-light text-primary me-2" title="Edición" (click)="toggleSidebar('period', p)">
+                                <i class="fas fa-edit"></i>
+                              </button>
+                            </div>
+                          </div>
+                        </li>
+                        <li class="list-group-item text-center">
+                          <button class="btn btn-sm btn-light text-primary" (click)="toggleSidebar('period')">
+                            Nuevo Periodo
+                          </button>
+                        </li>
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row" *ngIf="itemSelected.id === 'scores'">
+          <div id="notas-section">
+            <div class="row">
+              <div class="col-12">
+                <h4 class="mb-4"><i class="fas fa-book me-2"></i>Materias Disponibles</h4>
+                <div class="content-grid">
+                  <div class="module-card aritmetica" onclick="selectModule('Aritmética')">
+                    <i class="fas fa-calculator module-icon"></i>
+                    <p class="module-title">Aritmética</p>
+                  </div>
+
+                  <div class="module-card algebra" onclick="selectModule('Álgebra')">
+                    <i class="fas fa-square-root-alt module-icon"></i>
+                    <p class="module-title">Álgebra</p>
+                  </div>
+
+                  <div class="module-card geometria" onclick="selectModule('Geometría')">
+                    <i class="fas fa-shapes module-icon"></i>
+                    <p class="module-title">Geometría</p>
+                  </div>
+
+                  <div class="module-card estadistica" onclick="selectModule('Estadística')">
+                    <i class="fas fa-chart-bar module-icon"></i>
+                    <p class="module-title">Estadística</p>
+                  </div>
+
+                  <div class="module-card raz-matematico" onclick="selectModule('Raz. Matemático')">
+                    <i class="fas fa-brain module-icon"></i>
+                    <p class="module-title">Raz. Matemático</p>
+                  </div>
+
+                  <div class="module-card comunicacion" onclick="selectModule('Comunicación')">
+                    <i class="fas fa-comments module-icon"></i>
+                    <p class="module-title">Comunicación</p>
+                  </div>
+
+                  <div class="module-card raz-verbal" onclick="selectModule('Raz. Verbal')">
+                    <i class="fas fa-quote-left module-icon"></i>
+                    <p class="module-title">Raz. Verbal</p>
+                  </div>
+
+                  <div class="module-card plan-lector" onclick="selectModule('Plan Lector')">
+                    <i class="fas fa-book-open module-icon"></i>
+                    <p class="module-title">Plan Lector</p>
+                  </div>
+
+                  <div class="module-card ciencia-tecnologia" onclick="selectModule('Ciencia y Tecnología')">
+                    <i class="fas fa-microscope module-icon"></i>
+                    <p class="module-title">Ciencia y Tecnología</p>
+                  </div>
+
+                  <div class="module-card personal-social" onclick="selectModule('Personal Social')">
+                    <i class="fas fa-users module-icon"></i>
+                    <p class="module-title">Personal Social</p>
+                  </div>
+
+                  <div class="module-card tutoria" onclick="selectModule('Tutoría')">
+                    <i class="fas fa-chalkboard-teacher module-icon"></i>
+                    <p class="module-title">Tutoría</p>
+                  </div>
+
+                  <div class="module-card religion" onclick="selectModule('Religión')">
+                    <i class="fas fa-pray module-icon"></i>
+                    <p class="module-title">Religión</p>
+                  </div>
+
+                  <div class="module-card arte-cultura" onclick="selectModule('Arte y Cultura')">
+                    <i class="fas fa-palette module-icon"></i>
+                    <p class="module-title">Arte y Cultura</p>
+                  </div>
+
+                  <div class="module-card educacion-fisica" onclick="selectModule('Educación Física')">
+                    <i class="fas fa-running module-icon"></i>
+                    <p class="module-title">Educación Física</p>
+                  </div>
+
+                  <div class="module-card ingles" onclick="selectModule('Inglés')">
+                    <i class="fas fa-language module-icon"></i>
+                    <p class="module-title">Inglés</p>
+                  </div>
+
+                  <div class="module-card taller" onclick="selectModule('Taller')">
+                    <i class="fas fa-tools module-icon"></i>
+                    <p class="module-title">Taller</p>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="row mt-5">
+              <div class="col-12">
+                <h4 class="mb-4"><i class="fas fa-calendar me-2"></i>Períodos del Año Escolar</h4>
+                <div class="months-grid">
+                  <div class="month-card marzo" onclick="selectPeriod('Marzo')">Marzo</div>
+                  <div class="month-card abril" onclick="selectPeriod('Abril')">Abril</div>
+                  <div class="month-card mayo" onclick="selectPeriod('Mayo')">Mayo</div>
+                  <div class="month-card junio" onclick="selectPeriod('Junio')">Junio</div>
+                  <div class="month-card julio" onclick="selectPeriod('Julio')">Julio</div>
+                  <div class="month-card agosto" onclick="selectPeriod('Agosto')">Agosto</div>
+                  <div class="month-card septiembre" onclick="selectPeriod('Septiembre')">Septiembre</div>
+                  <div class="month-card octubre" onclick="selectPeriod('Octubre')">Octubre</div>
+                  <div class="month-card noviembre" onclick="selectPeriod('Noviembre')">Noviembre</div>
+                  <div class="month-card diciembre" onclick="selectPeriod('Diciembre')">Diciembre</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="form-row" *ngIf="itemSelected.id === 'students'">
+          <div class="col-12">
+            <div class="form-row">
+              <div class="col-4">
+                <div class="card">
+                  <div class="card-body text-center">
+                    <h2>{{allStudents.length}}</h2>
+                    Estudiantes
+                  </div>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-4"></div>
+                <div class="col-4"></div>
+                <div class="col-8 mt-2 mb-2">
+                  <div class="input-group">
+                    <span class="input-group-text" id="basic-addon1"><i class="fas fa-search"></i></span>
+                    <input type="text" class="form-control" placeholder="BUSCAR POR TEXTO" aria-label="TEXTO" [(ngModel)]="filter.students.text" aria-describedby="basic-addon1">
+                  </div>
+                </div>
+                <div class="col-4 mt-2 mb-2 text-end">
+                  <button class="btn btn-primary" (click)="toggleSidebar('student')">
+                    <i class="fas fa-plus me-1"></i>Agregar Estudiante
+                  </button>
+                </div>
+                <div class="col-12">
+                  <ul class="list-group">
+                    <li class="list-group-item list-group-item-secondary">
+                      <div class="row">
+                        <div class="col"><strong>Código</strong></div>
+                        <div class="col"><strong>Estudiante</strong></div>
+                        <div class="col"><strong>Género</strong></div>
+                        <div class="col"><strong>Fecha de Creación</strong></div>
+                        <div class="col text-end"><strong>Acciones</strong></div>
+                      </div>
+                    </li>
+                    <li class="list-group-item" *ngFor="let s of allStudents">
+                      <div class="row">
+                        <div class="col">{{s.code}}</div>
+                        <div class="col">{{s.father_last_name}} {{s.mother_last_name}}, {{s.names}}</div>
+                        <div class="col">{{s.gender}}</div>
+                        <div class="col">{{s.created_at | date:'dd/MM/yyyy'}}</div>
+                        <div class="col text-end">
+                          <button class="btn btn-sm btn-light text-primary rounded-circle me-2">
+                            <i class="fas fa-edit"></i>
+                          </button>
+                          <button class="btn btn-sm btn-danger rounded-circle">
+                            <i class="fas fa-trash"></i>
+                          </button>
+                        </div>
+                      </div>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="form-row" *ngIf="itemSelected.id === 'descriptive_conclusions'">
+          descriptive_conclusions
+        </div>
+        <div class="form-row" *ngIf="itemSelected.id === 'report_card'">
+          Boleta de notas
+        </div>
+      </div>
+      
+
+    </div>
+  </div>
+
+  <div class="overlay" [ngClass]="{'active': showForm == true}" *ngIf="newItem" (click)="toggleSidebar(newItem.typeSelected)"></div>
+
+  <!-- FORMULARIO - NUEVO REGISTRO -->
+  <div class="sidebar-form" id="sidebar-form" [ngClass]="{'open': showForm == true}">
+    <div class="sidebar-header" *ngIf="newItem">
+        <div class="row ps-3 pt-3 pe-3 m-0">
+          <div class="col-8">
+            <strong *ngIf="newItem.typeSelected === 'student'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Estudiante</strong>
+            <strong *ngIf="newItem.typeSelected === 'period'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Periodo</strong>
+          </div>
+          <div class="col-4 text-end">
+            <button class="btn btn-sm btn-danger" (click)="toggleSidebar(newItem.typeSelected)">
+              <i class="fas fa-times me-1"></i>Cancelar
+            </button>
+          </div>
+        </div>
+    </div>
+    <hr>
+    <div class="sidebar-content" *ngIf="newItem">
+      <form #studentForm="ngForm" *ngIf="newItem.typeSelected === 'student'">
+        <div class="row">
+          <div class="col-6">
+            <label for="code">DNI</label>
+            <input type="text" name="code" [(ngModel)]="newItem.code" maxlength="8" class="form-control" required>
+          </div>
+          <div class="col-6">
+            <label for="gender">Género</label>
+            <select name="gender" [(ngModel)]="newItem.gender" class="form-select">
+              <option [ngValue]="undefined">--SELECCIONE--</option>
+              <option *ngFor="let g of genders" [ngValue]="g.code">{{g.name}}</option>
+            </select>
+          </div>
+          <div class="col-6">
+            <label for="father_last_name">Apellido Paterno</label>
+            <input type="text" name="father_last_name" [(ngModel)]="newItem.father_last_name" maxlength="500" class="form-control" required>
+          </div>
+          <div class="col-6">
+            <label for="mother_last_name">Apellido Materno</label>
+            <input type="text" name="mother_last_name" [(ngModel)]="newItem.mother_last_name" maxlength="500" class="form-control" required>
+          </div>
+          <div class="col-12">
+            <label for="names">Nombres</label>
+            <input type="text" name="names" [(ngModel)]="newItem.names" class="form-control" maxlength="500" required>
+          </div>
+          <div class="col-12">
+            <label for="status">Estado</label>
+            <select name="status" [(ngModel)]="newItem.status" class="form-select" required>
+              <option [ngValue]="undefined">--SELECCIONE--</option>
+              <option *ngFor="let s of studentStatus" [ngValue]="s.id">{{s.name}}</option>
+            </select>
+          </div>
+          <div class="col-12 mt-3 text-center">
+            <button class="btn btn-danger me-5">
+              <i class="fas fa-times me-1"></i>Cancelar
+            </button>
+            <button class="btn btn-primary" [disabled]="studentForm.invalid" (click)="saveItem()">
+              <i class="fas fa-save me-1"></i>Guardar
+            </button>
+          </div>
+        </div>
+      </form>
+      <form #periodForm="ngForm" *ngIf="newItem.typeSelected === 'period'">
+        <div class="row">
+          <div class="col-4">
+            <label for="code">Código</label>
+            <input type="text" name="code" [(ngModel)]="newItem.code" class="form-control" required>
+          </div>
+          <div class="col-8">
+            <label for="name">Nombre</label>
+            <input type="text" name="name" [(ngModel)]="newItem.name" class="form-control" required>
+          </div>
+          <div class="col-6">
+            <label for="duration_in_months">Duración en Meses</label>
+            <input type="number" [min]="1" [max]="12" name="duration_in_months" [(ngModel)]="newItem.duration_in_months" class="form-control" required>
+          </div>
+          <div class="col-6">
+            <label for="status">Estado</label>
+            <select name="status" name="status" [(ngModel)]="newItem.status" class="form-select" required>
+              <option [ngValue]="undefined">--SELECCIONE--</option>
+              <option [ngValue]="true">ACTIVO</option>
+              <option [ngValue]="false">INACTIVO</option>
+            </select>
+          </div>
+          <div class="col-12 pt-2">
+            <button class="btn btn-danger m-2">
+              <i class="fas fa-times me-2"></i>Cancelar
+            </button>
+            <button class="btn btn-primary" [disabled]="periodForm.invalid" (click)="saveItem()">
+              <i class="fas fa-save me-2"></i>Guardar
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+<router-outlet />

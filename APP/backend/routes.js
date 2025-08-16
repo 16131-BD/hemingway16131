@@ -3,7 +3,8 @@ const api = express.Router();
 
 const MainController = require('./controller');
 
-api.post('/students-by', MainController.getStudentsBy);
-api.post('/students-create', MainController.createStudents);
+api.post('/:entity/by', MainController.getEntitiesBy);
+api.post('/:entity/create', MainController.createEntities);
+api.put('/:entity/update', MainController.updateEntities);
 
 module.exports = api;

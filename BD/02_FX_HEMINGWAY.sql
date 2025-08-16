@@ -87,7 +87,10 @@ IS '
 
 DROP FUNCTION IF EXISTS public.fx_ins_persons(JSONB);
 CREATE FUNCTION public.fx_ins_persons(JSONB)
-    RETURNS BOOLEAN
+    RETURNS table (
+    	id int,
+    	code VARCHAR(25)
+    )
 AS $BODY$
 DECLARE
     p_json_data ALIAS FOR $1;
@@ -116,7 +119,8 @@ BEGIN
     );
 
     -- 2. Insertar en tabla persons
-    INSERT INTO persons(
+	RETURN QUERY
+    INSERT INTO persons as A(
         code,
         father_last_name,
         mother_last_name,
@@ -127,17 +131,18 @@ BEGIN
         updated_at
     )
     SELECT  
-        UPPER(TRIM(code)),
-        UPPER(TRIM(father_last_name)),
-        UPPER(TRIM(mother_last_name)),
-        INITCAP(TRIM(names)),
-        UPPER(TRIM(gender)),
-        COALESCE(created_at, CURRENT_TIMESTAMP),
-        created_by,
-        updated_at
-    FROM tmp_persons;
+        UPPER(TRIM(B.code)),
+        UPPER(TRIM(B.father_last_name)),
+        UPPER(TRIM(B.mother_last_name)),
+        INITCAP(TRIM(B.names)),
+        UPPER(TRIM(B.gender)),
+        COALESCE(B.created_at, CURRENT_TIMESTAMP),
+        B.created_by,
+        B.updated_at
+    FROM tmp_persons AS B
+	RETURNING A.id,
+		A.code;
 
-    RETURN TRUE;
 
 END;
 $BODY$
@@ -233,6 +238,94 @@ IS '
 ***************************************************************************************************/';
 
 -- TABLA TIPOS
+
+-- ELIMINAR FUNCIÓN SI EXISTE
+-- ELIMINAR FUNCIÓN SI EXISTE
+DROP FUNCTION IF EXISTS public.fx_sel_types(JSONB);
+
+CREATE FUNCTION public.fx_sel_types(JSONB)
+    RETURNS TABLE (
+        id            INT,
+        code          VARCHAR(100),
+        type          VARCHAR(100),
+        name          VARCHAR(500),
+        description   TEXT,
+        status        BOOLEAN,
+        created_at    TIMESTAMP WITH TIME ZONE,
+        created_by    INT,
+        updated_at    TIMESTAMP WITH TIME ZONE
+    )
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+    v_id        INT;
+    v_code      VARCHAR(100);
+    v_type      VARCHAR(100);
+    v_name      VARCHAR(500);
+    v_status    BOOLEAN;
+BEGIN
+    -- Extraer filtros desde el JSONB
+    SELECT  
+        x.id,
+        x.code,
+        x.type,
+        x.name,
+        x.status
+    INTO
+        v_id,
+        v_code,
+        v_type,
+        v_name,
+        v_status
+    FROM JSONB_TO_RECORD(p_json_data) AS x(
+        id      INT,
+        code    VARCHAR(100),
+        type    VARCHAR(100),
+        name    VARCHAR(500),
+        status  BOOLEAN
+    );
+
+    RETURN QUERY
+    SELECT 
+        t.id,
+        t.code,
+        t.type,
+        t.name,
+        t.description,
+        t.status,
+        t.created_at,
+        t.created_by,
+        t.updated_at
+    FROM types t
+    WHERE (v_id IS NULL OR t.id = v_id)
+      AND (v_code IS NULL OR t.code ILIKE '%' || v_code || '%')
+      AND (v_type IS NULL OR t.type ILIKE '%' || v_type || '%')
+      AND (v_name IS NULL OR t.name ILIKE '%' || v_name || '%')
+      AND (v_status IS NULL OR t.status = v_status);
+
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_sel_types(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Consultar registros de types con filtros opcionales
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.15
+* SISTEMA / MODULO : [Sistema] / Catálogos
+* SINTAXIS DE EJEMPLO:
+* SELECT * FROM public.fx_sel_types(
+*     ''{"id": 1}''
+* );
+* SELECT * FROM public.fx_sel_types(
+*     ''{"code": "GENERO", "status": true}''
+* );
+***************************************************************************************************/';
+
 
 DROP FUNCTION IF EXISTS public.fx_ins_types(JSONB);
 CREATE FUNCTION public.fx_ins_types(JSONB)
@@ -374,59 +467,61 @@ IS '
 
 -- TABLA PERIODOS
 
+-- ELIMINAR FUNCIÓN SI EXISTE
 DROP FUNCTION IF EXISTS public.fx_ins_periods(JSONB);
 CREATE FUNCTION public.fx_ins_periods(JSONB)
-    RETURNS BOOLEAN
+    RETURNS TABLE (
+        id INT,
+        code VARCHAR(25)
+    )
 AS $BODY$
 DECLARE
     p_json_data ALIAS FOR $1;
 BEGIN
-    -- Crear tabla temporal desde el JSONB
+    -- 1. Crear tabla temporal para recibir los datos del JSONB
     DROP TABLE IF EXISTS tmp_periods;
     CREATE TEMPORARY TABLE tmp_periods AS
     SELECT 
-        x.period_code,
-        x.period_name,
-        x.start_date,
-        x.end_date,
+        x.code,
+        x.name,
+        x.duration_in_months,
         x.status,
         x.created_at,
         x.created_by,
         x.updated_at
-    FROM JSONB_TO_RECORDSET(p_json_data) AS x( 
-        period_code   VARCHAR(50),
-        period_name   VARCHAR(100),
-        start_date    DATE,
-        end_date      DATE,
-        status        BOOLEAN,
-        created_at    TIMESTAMP WITH TIME ZONE,
-        created_by    INT,
-        updated_at    TIMESTAMP WITH TIME ZONE
+    FROM JSONB_TO_RECORDSET(p_json_data) AS x(
+        code                VARCHAR(25),
+        name                VARCHAR(500),
+        duration_in_months  INT,
+        status              BOOL,
+        created_at          TIMESTAMP WITH TIME ZONE,
+        created_by          INT,
+        updated_at          TIMESTAMP WITH TIME ZONE
     );
 
-    -- Insertar en tabla periods
-    INSERT INTO periods(
-        period_code,
-        period_name,
-        start_date,
-        end_date,
+    -- 2. Insertar en tabla periods
+    RETURN QUERY
+    INSERT INTO periods AS A(
+        code,
+        name,
+        duration_in_months,
         status,
         created_at,
         created_by,
         updated_at
     )
     SELECT  
-        UPPER(TRIM(period_code)),
-        INITCAP(TRIM(period_name)),
-        start_date,
-        end_date,
-        COALESCE(status, TRUE),
-        COALESCE(created_at, CURRENT_TIMESTAMP),
-        created_by,
-        updated_at
-    FROM tmp_periods;
+        UPPER(TRIM(B.code)),
+        INITCAP(TRIM(B.name)),
+        B.duration_in_months,
+        COALESCE(B.status, TRUE),
+        COALESCE(B.created_at, CURRENT_TIMESTAMP),
+        B.created_by,
+        B.updated_at
+    FROM tmp_periods AS B
+    RETURNING A.id,
+              A.code;
 
-    RETURN TRUE;
 END;
 $BODY$
 LANGUAGE plpgsql VOLATILE SECURITY DEFINER
@@ -438,12 +533,15 @@ IS '
 * COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
 *
 * OBJETIVO : Insertar nuevo registro en periods
-* ESCRITO POR : Jorge Mayo
-* FECHA CREACIÓN : 2025.08.14
-* SISTEMA / MODULO : [Sistema] / Catálogos
+* ESCRITO POR : 16131-BD - Developers
+* FECHA CREACIÓN : 2025.08.15
+* SISTEMA / MODULO : PRINCIPAL / Periodos
+* MODIFICACIONES :
+* FECHA   RESPONSABLE  DESCRIPCIÓN DEL CAMBIO
+*
 * SINTAXIS DE EJEMPLO:
 * SELECT * FROM public.fx_ins_periods(
-*     ''[{"period_code":"2025A","period_name":"Periodo Académico 2025A","start_date":"2025-01-15","end_date":"2025-06-30","created_by":1}]''
+*     ''[{"code":"2025A","name":"Periodo Académico 2025-A","duration_in_months":5,"created_by":1}]''
 * );
 ***************************************************************************************************/';
 
