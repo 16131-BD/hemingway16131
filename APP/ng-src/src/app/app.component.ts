@@ -32,8 +32,8 @@ export class AppComponent implements OnInit {
       selected: false
     },
     {
-      id: "academic_config",
-      icon: "fas fa-cog",
+      id: "academic_period",
+      icon: "fas fa-graduation-cap",
       name: "Periodos Academicos",
       description: "Inicialice las variables iniciales del aplicativo",
       selected: false
@@ -74,10 +74,15 @@ export class AppComponent implements OnInit {
   genders: any[] = [];
   studentStatus: any[] = [];
   periods: any[] = [];
+  grades: any[] = [];
+  academic_periods: any[] = [];
   filter: any = {
     students: {
       text: undefined
-    }
+    },
+    academic_periods: {
+      text: undefined
+    },
   };
 
   showForm: boolean = false;
@@ -88,6 +93,8 @@ export class AppComponent implements OnInit {
     this.getTypes();
     this.getStudents();
     this.getPeriods();
+    this.getGrades();
+    this.getAcademicPeriods();
   }
 
   async getTypes() {
@@ -102,6 +109,16 @@ export class AppComponent implements OnInit {
     let result: any = await this.MainAPI.getEntitiesBy('periods', {filter: {}});
     console.log(result);
     this.periods = result.data;
+  }
+  
+  async getGrades() {
+    let result: any = await this.MainAPI.getEntitiesBy('grades', {filter: [{}]});
+    this.grades = result.data;
+  }
+
+  async getAcademicPeriods() {
+    let result: any = await this.MainAPI.getEntitiesBy('academic_periods', {filter: {}});
+    this.academic_periods = result.data;
   }
 
   selectItem(item: any) {
@@ -128,19 +145,15 @@ export class AppComponent implements OnInit {
 
   toggleSidebar(type: string, item?: any) {
     this.showForm = !this.showForm;
-    this.newItem = {};
-    if (item) {
-      this.newItem = JSON.parse(JSON.stringify(item));
-      this.newItem.editing = true;
+    if (this.showForm) {
+      this.newItem = {};
+      if (item) {
+        this.newItem = JSON.parse(JSON.stringify(item));
+        this.newItem.editing = true;
+      }
+      this.newItem.typeSelected = type;
     }
-    this.newItem.typeSelected = type;
-    // switch (type) {
-    //   case "student":
-    //     break;
-      
-    //   default:
-    //     break;
-    // }
+    
   }
 
   async saveItem() {
@@ -203,6 +216,54 @@ export class AppComponent implements OnInit {
             updateds: [this.newItem]
           };
           result = await this.MainAPI.updateEntities('periods', body);
+        }
+        if (!result.success) {
+          Swal.fire({
+            text: result.message,
+            icon: 'error'
+          });
+          return;
+        }
+        Swal.fire({
+          text: 'Se realizo correctamente la operación',
+          icon: 'success'
+        });
+        break;
+      case 'grade':
+        if (!this.newItem.editing) {
+          body = {
+            news: [this.newItem]
+          };
+          result = await this.MainAPI.saveEntities('grades', body);
+        } else {
+          body = {
+            updateds: [this.newItem]
+          };
+          result = await this.MainAPI.updateEntities('grades', body);
+        }
+        if (!result.success) {
+          Swal.fire({
+            text: result.message,
+            icon: 'error'
+          });
+          return;
+        }
+        Swal.fire({
+          text: 'Se realizo correctamente la operación',
+          icon: 'success'
+        });
+        break;
+      case 'academic_period':
+        if (!this.newItem.editing) {
+          body = {
+            news: [this.newItem]
+          };
+          result = await this.MainAPI.saveEntities('academic_periods', body);
+        } else {
+          body = {
+            updateds: [this.newItem]
+          };
+          result = await this.MainAPI.updateEntities('academic_periods', body);
         }
         if (!result.success) {
           Swal.fire({

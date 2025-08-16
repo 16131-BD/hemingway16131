@@ -275,6 +275,7 @@ create table academic_periods(
 	init_date date,
 	finish_date date,
 	status bool default true,
+	isCurrent bool default false,
 	created_at timestamp with time zone default current_date,
 	created_by int references persons(id),
 	updated_at timestamp with time zone
@@ -289,6 +290,7 @@ comment on column academic_periods.period_id is 'FK -> periods.id (Código de Pe
 comment on column academic_periods.init_date is 'Fecha de Inicio';
 comment on column academic_periods.finish_date is 'Fecha de Fin';
 comment on column academic_periods.status is 'Estado del registro (activo/inactivo)';
+comment on column academic_periods.isCurrent is 'Periodo Academico actual';
 comment on column academic_periods.created_at is 'Fecha de creación';
 comment on column academic_periods.created_by is 'Persona que creó el registro (FK -> persons.id)';
 comment on column academic_periods.updated_at is 'Fecha de Actualización del registro';
