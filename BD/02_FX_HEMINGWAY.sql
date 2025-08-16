@@ -611,6 +611,81 @@ IS '
 ***************************************************************************************************/';
 
 -- TABLA CURSOS
+DROP FUNCTION IF EXISTS public.fx_sel_courses(JSONB);
+CREATE FUNCTION public.fx_sel_courses(JSONB)
+    RETURNS TABLE (
+        id          INT,
+        code        VARCHAR,
+        name        VARCHAR,
+        description VARCHAR,
+        status      BOOLEAN,
+        created_at  TIMESTAMP WITH TIME ZONE,
+        created_by  INT,
+        updated_at  TIMESTAMP WITH TIME ZONE
+    )
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+BEGIN
+    RETURN QUERY
+    WITH filtros AS (
+        SELECT 
+            x.id,
+            x.code,
+            x.name,
+            x.status,
+            x.created_by,
+            x.created_at
+        FROM JSONB_TO_RECORDSET(COALESCE(p_json_data, '[]'::JSONB)) AS x(
+            id          INT,
+            code        VARCHAR(50),
+            name        VARCHAR(500),
+            status      BOOLEAN,
+            created_by  INT,
+            created_at  TIMESTAMP WITH TIME ZONE
+        )
+    )
+    SELECT 
+        c.id,
+        c.code,
+        c.name,
+        c.description,
+        c.status,
+        c.created_at,
+        c.created_by,
+        c.updated_at
+    FROM courses c
+    LEFT JOIN filtros f ON TRUE
+    WHERE
+        (f.id IS NULL OR c.id = f.id)
+        AND (f.code IS NULL OR c.code ILIKE '%' || f.code || '%')
+        AND (f.name IS NULL OR c.name ILIKE '%' || f.name || '%')
+        AND (f.status IS NULL OR c.status = f.status)
+        AND (f.created_by IS NULL OR c.created_by = f.created_by)
+        AND (f.created_at IS NULL OR DATE(c.created_at) = DATE(f.created_at));
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_sel_courses(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Consultar registros en courses con filtros opcionales enviados en formato JSONB
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.16
+* SISTEMA / MODULO : [Sistema] / Cursos
+* SINTAXIS DE EJEMPLO:
+* -- Todos los cursos
+* SELECT * FROM public.fx_sel_courses(NULL);
+*
+* -- Filtrar por código y estado
+* SELECT * FROM public.fx_sel_courses(
+*     ''[{"code":"MAT101","status":true}]''
+* );
+***************************************************************************************************/';
 
 -- ============================================
 -- INSERTAR REGISTRO EN COURSES
@@ -1630,6 +1705,8 @@ CREATE FUNCTION public.fx_sel_academic_periods(JSONB)
         id          INT,
         year        INT,
         period_id   INT,
+        period_code varchar(25),
+        period		varchar(500),
         init_date   DATE,
         finish_date DATE,
         status      BOOL,
@@ -1670,6 +1747,8 @@ BEGIN
         ap.id,
         ap.year,
         ap.period_id,
+		p.code as period,
+		p.name as period,
         ap.init_date,
         ap.finish_date,
         ap.status,
@@ -1677,7 +1756,9 @@ BEGIN
         ap.created_at,
         ap.created_by,
         ap.updated_at
-    FROM academic_periods ap
+    FROM academic_periods as ap
+		INNER JOIN periods as p
+		on ap.period_id = p.id
     LEFT JOIN filtros f ON TRUE
     WHERE
         (f.id IS NULL OR ap.id = f.id)
@@ -1875,3 +1956,223 @@ IS '
 *   ]''
 * );
 ***************************************************************************************************/';
+
+
+DROP FUNCTION IF EXISTS public.fx_sel_grade_in_academic_periods(JSONB);
+CREATE FUNCTION public.fx_sel_grade_in_academic_periods(JSONB)
+    RETURNS TABLE (
+        id                 INT,
+        academic_period_id INT,
+        grade_id           INT,
+        vacancies          INT,
+        status             BOOLEAN,
+        created_at         TIMESTAMP WITH TIME ZONE,
+        created_by         INT,
+        updated_at         TIMESTAMP WITH TIME ZONE
+    )
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+BEGIN
+    RETURN QUERY
+    WITH filtros AS (
+        SELECT 
+            x.id,
+            x.academic_period_id,
+            x.grade_id,
+            x.vacancies,
+            x.status,
+            x.created_by,
+            x.created_at
+        FROM JSONB_TO_RECORDSET(COALESCE(p_json_data, '[]'::JSONB)) AS x(
+            id                 INT,
+            academic_period_id INT,
+            grade_id           INT,
+            vacancies          INT,
+            status             BOOLEAN,
+            created_by         INT,
+            created_at         TIMESTAMP WITH TIME ZONE
+        )
+    )
+    SELECT 
+        g.id,
+        g.academic_period_id,
+        g.grade_id,
+        g.vacancies,
+        g.status,
+        g.created_at,
+        g.created_by,
+        g.updated_at
+    FROM grade_in_academic_periods g
+    LEFT JOIN filtros f ON TRUE
+    WHERE
+        (f.id IS NULL OR g.id = f.id)
+        AND (f.academic_period_id IS NULL OR g.academic_period_id = f.academic_period_id)
+        AND (f.grade_id IS NULL OR g.grade_id = f.grade_id)
+        AND (f.vacancies IS NULL OR g.vacancies = f.vacancies)
+        AND (f.status IS NULL OR g.status = f.status)
+        AND (f.created_by IS NULL OR g.created_by = f.created_by)
+        AND (f.created_at IS NULL OR DATE(g.created_at) = DATE(f.created_at));
+
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_sel_grade_in_academic_periods(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Consultar registros en grade_in_academic_periods con filtros opcionales en formato JSONB
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.16
+* SISTEMA / MODULO : Académico / Grados en Periodos
+* SINTAXIS DE EJEMPLO:
+* -- Todos los registros
+* SELECT * FROM public.fx_sel_grade_in_academic_periods(NULL);
+*
+* -- Filtrar por periodo y grado
+* SELECT * FROM public.fx_sel_grade_in_academic_periods(
+*     ''[{"academic_period_id":1,"grade_id":2}]''
+* );
+***************************************************************************************************/';
+
+DROP FUNCTION IF EXISTS public.fx_ins_grade_in_academic_periods(JSONB);
+CREATE FUNCTION public.fx_ins_grade_in_academic_periods(JSONB)
+    RETURNS TABLE (
+        id INT,
+        academic_period_id INT,
+        grade_id INT
+    )
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+BEGIN
+    -- Crear tabla temporal
+    DROP TABLE IF EXISTS tmp_grade_in_academic_periods;
+    CREATE TEMPORARY TABLE tmp_grade_in_academic_periods AS
+    SELECT 
+        x.academic_period_id,
+        x.grade_id,
+        x.vacancies,
+        x.status,
+        x.created_at,
+        x.created_by,
+        x.updated_at
+    FROM JSONB_TO_RECORDSET(p_json_data) AS x(
+        academic_period_id INT,
+        grade_id           INT,
+        vacancies          INT,
+        status             BOOLEAN,
+        created_at         TIMESTAMP WITH TIME ZONE,
+        created_by         INT,
+        updated_at         TIMESTAMP WITH TIME ZONE
+    );
+	
+	-- Eliminamos todos los registros (grados del periodo academico)
+	DELETE FROM grade_in_academic_periods as g
+	USING 	tmp_grade_in_academic_periods t
+	WHERE 	g.academic_period_id = t.academic_period_id;
+
+    -- Insertar registros
+    RETURN QUERY
+    INSERT INTO grade_in_academic_periods AS g(
+        academic_period_id,
+        grade_id,
+        vacancies,
+        status,
+        created_at,
+        created_by,
+        updated_at
+    )
+    SELECT  
+        t.academic_period_id,
+        t.grade_id,
+        t.vacancies,
+        COALESCE(t.status, TRUE),
+        COALESCE(t.created_at, CURRENT_TIMESTAMP),
+        t.created_by,
+        t.updated_at
+    FROM tmp_grade_in_academic_periods as t
+    RETURNING g.id, g.academic_period_id, g.grade_id;
+
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_ins_grade_in_academic_periods(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Insertar nuevo registro en grade_in_academic_periods
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.16
+* SISTEMA / MODULO : Académico / Grados en Periodos
+* SINTAXIS DE EJEMPLO:
+* SELECT * FROM public.fx_ins_grade_in_academic_periods(
+*     ''[{"academic_period_id":1,"grade_id":3,"vacancies":40,"created_by":1}]''
+* );
+***************************************************************************************************/';
+
+DROP FUNCTION IF EXISTS public.fx_upd_grade_in_academic_periods(JSONB);
+CREATE FUNCTION public.fx_upd_grade_in_academic_periods(JSONB)
+    RETURNS BOOLEAN
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+BEGIN
+    DROP TABLE IF EXISTS tmp_grade_in_academic_periods_upd;
+    CREATE TEMPORARY TABLE tmp_grade_in_academic_periods_upd AS
+    SELECT 
+        x.id,
+        x.academic_period_id,
+        x.grade_id,
+        x.vacancies,
+        x.status,
+        x.updated_at
+    FROM JSONB_TO_RECORDSET(p_json_data) AS x(
+        id                 INT,
+        academic_period_id INT,
+        grade_id           INT,
+        vacancies          INT,
+        status             BOOLEAN,
+        updated_at         TIMESTAMP WITH TIME ZONE
+    );
+
+    UPDATE grade_in_academic_periods g
+    SET
+        academic_period_id = COALESCE(t.academic_period_id, g.academic_period_id),
+        grade_id           = COALESCE(t.grade_id, g.grade_id),
+        vacancies          = COALESCE(t.vacancies, g.vacancies),
+        status             = COALESCE(t.status, g.status),
+        updated_at         = COALESCE(t.updated_at, CURRENT_TIMESTAMP)
+    FROM tmp_grade_in_academic_periods_upd t
+    WHERE g.id = t.id;
+
+    RETURN TRUE;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_upd_grade_in_academic_periods(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Actualizar registro(s) en grade_in_academic_periods (actualización parcial)
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.16
+* SISTEMA / MODULO : Académico / Grados en Periodos
+* SINTAXIS DE EJEMPLO:
+* SELECT * FROM public.fx_upd_grade_in_academic_periods(
+*   ''[
+*      {"id":1,"vacancies":35,"status":true},
+*      {"id":2,"grade_id":4,"updated_at":"2025-08-16T10:30:00Z"}
+*   ]''
+* );
+***************************************************************************************************/';
+

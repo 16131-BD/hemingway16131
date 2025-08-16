@@ -75,7 +75,9 @@ export class AppComponent implements OnInit {
   studentStatus: any[] = [];
   periods: any[] = [];
   grades: any[] = [];
-  academic_periods: any[] = [];
+  gradeInAcademicPeriods: any[] = [];
+  courses: any[] = [];
+  academicPeriods: any[] = [];
   filter: any = {
     students: {
       text: undefined
@@ -94,7 +96,8 @@ export class AppComponent implements OnInit {
     this.getStudents();
     this.getPeriods();
     this.getGrades();
-    this.getAcademicPeriods();
+    this.getCourses();
+    
   }
 
   async getTypes() {
@@ -114,11 +117,36 @@ export class AppComponent implements OnInit {
   async getGrades() {
     let result: any = await this.MainAPI.getEntitiesBy('grades', {filter: [{}]});
     this.grades = result.data;
+    this.getGradesInAcademicPeriods();
+    this.getAcademicPeriods();
+  }
+
+  async getCourses() {
+    let result: any = await this.MainAPI.getEntitiesBy('courses', {filter: [{}]});
+    this.courses = result.data;
+  }
+
+  async getGradesInAcademicPeriods() {
+    let result: any = await this.MainAPI.getEntitiesBy('grade_in_academic_periods', {filter: [{}]});
+    this.gradeInAcademicPeriods = result.data;
   }
 
   async getAcademicPeriods() {
-    let result: any = await this.MainAPI.getEntitiesBy('academic_periods', {filter: {}});
-    this.academic_periods = result.data;
+    let result: any = await this.MainAPI.getEntitiesBy('academic_periods', {filter: [{}]});
+    this.academicPeriods = result.data;
+    this.academicPeriods.map((a) => {
+      a.grades = JSON.parse(JSON.stringify(this.grades));
+    });
+
+    this.academicPeriods.map((a) => {
+      a.grades.map((g: any) => {
+        let gradeWithData = this.gradeInAcademicPeriods.find((x: any) => x.academic_period_id === a.id && x.grade_id === g.id);
+        if (gradeWithData) {
+          g.vacancies = gradeWithData.vacancies;
+          g.selected = true;
+        }
+      });
+    });
   }
 
   selectItem(item: any) {
@@ -156,7 +184,7 @@ export class AppComponent implements OnInit {
     
   }
 
-  async saveItem() {
+  async saveItem(item?: any) {
     let result;
     let body: any = {
       news: [this.newItem]
@@ -253,6 +281,30 @@ export class AppComponent implements OnInit {
           icon: 'success'
         });
         break;
+      case 'course':
+        if (!this.newItem.editing) {
+          body = {
+            news: [this.newItem]
+          };
+          result = await this.MainAPI.saveEntities('courses', body);
+        } else {
+          body = {
+            updateds: [this.newItem]
+          };
+          result = await this.MainAPI.updateEntities('courses', body);
+        }
+        if (!result.success) {
+          Swal.fire({
+            text: result.message,
+            icon: 'error'
+          });
+          return;
+        }
+        Swal.fire({
+          text: 'Se realizo correctamente la operación',
+          icon: 'success'
+        });
+        break;
       case 'academic_period':
         if (!this.newItem.editing) {
           body = {
@@ -277,6 +329,7 @@ export class AppComponent implements OnInit {
           icon: 'success'
         });
         break;
+      
       default:
         break;
     }
@@ -284,7 +337,52 @@ export class AppComponent implements OnInit {
     this.toggleSidebar(this.newItem.typeSelected);
   }
 
-  
+  async saveDetail(type: string, item: any) {
+    let result;
+    let body: any = {
+      news: []
+    };
+    switch (type) {
+      case 'grade_in_academic_period':
+        console.log(item);
+        let grade_in_academic_periods = item.grades.filter((g: any) => g.selected).map((g: any) => {
+          return {
+            academic_period_id: item.id,
+            grade_id: g.id,
+            vacancies: g.vacancies
+          };
+        })
+        body = {
+          news: grade_in_academic_periods
+        };
+        result = await this.MainAPI.saveEntities('grade_in_academic_periods', body);
+        
+        if (!result.success) {
+          Swal.fire({
+            text: result.message,
+            icon: 'error'
+          });
+          return;
+        }
+        Swal.fire({
+          text: 'Se realizo correctamente la operación',
+          icon: 'success'
+        });
+        break;
+      default:
+        break;
+    }
+  }
 
+  toggleChangeCurrent(item: any) {
+    item.isCurrent = !item.isCurrent;
+  }
+  
+  toggleSelectGrade(grade: any) {
+    grade.selected = !grade.selected;
+    if (!grade.selected) {
+      grade.vacancies = undefined;
+    }
+  }
 
 }
