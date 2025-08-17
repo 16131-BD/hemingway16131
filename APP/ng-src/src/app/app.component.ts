@@ -92,6 +92,20 @@ export class AppComponent implements OnInit {
   currentAcademicPeriod: any;
   studentToEnrollment: any;
 
+  romanNumbers: any = {
+    1: "I",
+    2: "II",
+    3: "III",
+    4: "IV",
+    5: "V",
+    6: "VI",
+    7: "VII",
+    8: "VIII",
+    9: "IX",
+    10: "X",
+    11: "XI",
+    12: "XII"
+  };
 
   filter: any = {
     students: {
@@ -376,6 +390,22 @@ export class AppComponent implements OnInit {
             news: [this.newItem]
           };
           result = await this.MainAPI.saveEntities('academic_periods', body);
+          let periodSelected = this.periods.find((p: any) => p.id === this.newItem.period_id);
+          
+          let periodInserted = result.data.find((d: any) => d.code === this.newItem.code);
+          
+          let bodyAcademicPeriodDetail: any = {
+            news: Array(periodSelected.quantity).fill(0).map((_, i) => { 
+              return { 
+                academic_period_id: periodInserted.id, 
+                name: `${this.romanNumbers[i + 1]} ${periodSelected.name}`.toUpperCase(),
+                order_num: i + 1
+              }
+            })
+          };
+
+          let resultAcademicPeriodDetail: any = await this.MainAPI.saveEntities('academic_period_details', bodyAcademicPeriodDetail);
+          console.log(resultAcademicPeriodDetail);
         } else {
           body = {
             updateds: [this.newItem]
@@ -394,7 +424,6 @@ export class AppComponent implements OnInit {
           icon: 'success'
         });
         break;
-      
       default:
         break;
     }
@@ -433,6 +462,7 @@ export class AppComponent implements OnInit {
           text: 'Se realizo correctamente la operación',
           icon: 'success'
         });
+        this.getStudentsInGrade();
         break;
       default:
         break;
@@ -527,6 +557,32 @@ export class AppComponent implements OnInit {
     });
     this.toggleSidebar(this.newItem.typeSelected);
     this.getStudentsInGrade();
+  }
+
+  async toggleAddCourse(course: any, parent: any) {
+    course.selected = !course.selected;
+    console.log(course);
+    console.log(parent);
+    let body: any = {
+      news: [
+        {
+          id: course.id,
+          grade_in_academic_period_id: parent.grade_in_academic_period_id,
+          course_id: course.id
+        }
+      ]
+    }
+    let result: any;
+    if (course.selected) {
+      console.log(body);
+      result = await this.MainAPI.saveEntities('courses_in_grade', body);
+      let courseInserted: any = result.data.find((r: any) => r.grade_in_academic_period_id === parent.grade_in_academic_period_id && r.course_id === course.id);
+      if (courseInserted) {
+        course.courses_in_grade_id = courseInserted.id;
+      }
+    } else {
+      result = await this.MainAPI.deleteEntities('courses_in_grade', body);
+    }
   }
 
 }

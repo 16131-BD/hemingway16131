@@ -473,7 +473,7 @@ CREATE FUNCTION public.fx_sel_periods(JSONB)
         id                 INT,
         code               VARCHAR,
         name               VARCHAR,
-        duration_in_months INT,
+        quantity INT,
         status             BOOLEAN,
         created_at         TIMESTAMP WITH TIME ZONE,
         created_by         INT,
@@ -489,7 +489,7 @@ BEGIN
             x.id,
             x.code,
             x.name,
-            x.duration_in_months,
+            x.quantity,
             x.status,
             x.created_by,
             x.created_at
@@ -497,7 +497,7 @@ BEGIN
             id                 INT,
             code               VARCHAR(25),
             name               VARCHAR(500),
-            duration_in_months INT,
+            quantity INT,
             status             BOOLEAN,
             created_by         INT,
             created_at         TIMESTAMP WITH TIME ZONE
@@ -507,7 +507,7 @@ BEGIN
         p.id,
         p.code,
         p.name,
-        p.duration_in_months,
+        p.quantity,
         p.status,
         p.created_at,
         p.created_by,
@@ -518,7 +518,7 @@ BEGIN
         (f.id IS NULL OR p.id = f.id)
         AND (f.code IS NULL OR p.code ILIKE '%' || f.code || '%')
         AND (f.name IS NULL OR p.name ILIKE '%' || f.name || '%')
-        AND (f.duration_in_months IS NULL OR p.duration_in_months = f.duration_in_months)
+        AND (f.quantity IS NULL OR p.quantity = f.quantity)
         AND (f.status IS NULL OR p.status = f.status)
         AND (f.created_by IS NULL OR p.created_by = f.created_by)
         AND (f.created_at IS NULL OR DATE(p.created_at) = DATE(f.created_at));
@@ -565,7 +565,7 @@ BEGIN
     SELECT 
         x.code,
         x.name,
-        x.duration_in_months,
+        x.quantity,
         x.status,
         x.created_at,
         x.created_by,
@@ -573,7 +573,7 @@ BEGIN
     FROM JSONB_TO_RECORDSET(p_json_data) AS x(
         code                VARCHAR(25),
         name                VARCHAR(500),
-        duration_in_months  INT,
+        quantity  INT,
         status              BOOL,
         created_at          TIMESTAMP WITH TIME ZONE,
         created_by          INT,
@@ -585,7 +585,7 @@ BEGIN
     INSERT INTO periods AS A(
         code,
         name,
-        duration_in_months,
+        quantity,
         status,
         created_at,
         created_by,
@@ -594,7 +594,7 @@ BEGIN
     SELECT  
         UPPER(TRIM(B.code)),
         INITCAP(TRIM(B.name)),
-        B.duration_in_months,
+        B.quantity,
         COALESCE(B.status, TRUE),
         COALESCE(B.created_at, CURRENT_TIMESTAMP),
         B.created_by,
@@ -622,7 +622,7 @@ IS '
 *
 * SINTAXIS DE EJEMPLO:
 * SELECT * FROM public.fx_ins_periods(
-*     ''[{"code":"2025A","name":"Periodo Académico 2025-A","duration_in_months":5,"created_by":1}]''
+*     ''[{"code":"2025A","name":"Periodo Académico 2025-A","quantity":5,"created_by":1}]''
 * );
 ***************************************************************************************************/';
 
@@ -2588,6 +2588,11 @@ BEGIN
         updated_at                  TIMESTAMP WITH TIME ZONE
     );
 
+    DELETE FROM courses_in_grade as g
+	USING 	tmp_courses_in_grade t
+	WHERE 	g.grade_in_academic_period_id = t.grade_in_academic_period_id
+    AND     g.course_id = t.course_id;
+
     -- Insertar registros
     RETURN QUERY
     INSERT INTO courses_in_grade AS c(
@@ -2686,6 +2691,58 @@ IS '
 *   ]''
 * );
 ***************************************************************************************************/';
+
+DROP FUNCTION IF EXISTS public.fx_del_courses_in_grade(JSONB);
+CREATE FUNCTION public.fx_del_courses_in_grade(JSONB)
+    RETURNS BOOLEAN
+AS $BODY$
+DECLARE
+    p_json_data ALIAS FOR $1;
+BEGIN
+    -- 1) Cargar IDs desde el JSONB a una tabla temporal
+    DROP TABLE IF EXISTS tmp_courses_in_grade_del;
+    CREATE TEMPORARY TABLE tmp_courses_in_grade_del AS
+    SELECT 
+        x.id
+    FROM JSONB_TO_RECORDSET(p_json_data) AS x(
+        id INT
+    );
+
+    -- 2) Eliminar registros de courses_in_grade
+    DELETE FROM courses_in_grade cig
+    USING tmp_courses_in_grade_del t
+    WHERE cig.id = t.id;
+
+    RETURN TRUE;
+END;
+$BODY$
+LANGUAGE plpgsql VOLATILE SECURITY DEFINER
+COST 1000;
+
+COMMENT ON FUNCTION public.fx_del_courses_in_grade(JSONB)
+IS '
+/***************************************************************************************************
+* COPYRIGHT © 2025 [TU EMPRESA/ORG] - ALL RIGHTS RESERVED.
+*
+* OBJETIVO : Eliminar registro(s) de la tabla courses_in_grade según IDs enviados en JSONB
+* ESCRITO POR : Jorge Mayo
+* FECHA CREACIÓN : 2025.08.16
+* SISTEMA / MODULO : Académico / Cursos en Grados
+* MODIFICACIONES :
+* FECHA   RESPONSABLE  DESCRIPCIÓN DEL CAMBIO
+*
+* SINTAXIS DE EJEMPLO:
+* -- Eliminar un registro
+* SELECT * FROM public.fx_del_courses_in_grade(
+*   ''[{"id":1}]''
+* );
+*
+* -- Eliminar múltiples registros
+* SELECT * FROM public.fx_del_courses_in_grade(
+*   ''[{"id":2},{"id":3},{"id":4}]''
+* );
+***************************************************************************************************/';
+
 
 DROP FUNCTION IF EXISTS public.fx_sel_competences(JSONB);
 CREATE FUNCTION public.fx_sel_competences(JSONB)
@@ -3020,7 +3077,7 @@ BEGIN
     INSERT INTO academic_period_details AS apd(
         academic_period_id,
         name,
-        "order",
+        order_num,
         status,
         created_at,
         created_by,

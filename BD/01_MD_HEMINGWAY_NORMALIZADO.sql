@@ -2,10 +2,11 @@
 
 drop table if exists descriptive_conclusions;
 drop table if exists attendances;
-drop table if exists courses_in_grade;
+
 drop table if exists score_details;
 drop table if exists competences;
 drop table if exists scores;
+drop table if exists courses_in_grade;
 drop table if exists students_in_grade;
 drop table if exists grade_in_academic_periods;
 drop table if exists academic_period_details;

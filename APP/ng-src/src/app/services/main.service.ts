@@ -31,6 +31,15 @@ export class MainService {
     }
   }
 
+  async deleteEntities(entity: string, body: any) {
+    try {
+      let result: any = await this.Http.post(`${this.uri}/${entity}/delete`, body).toPromise();
+      return result;
+    } catch (error: any) {
+      messageAlert(null, `${error}`, 'error');
+    }
+  }
+
   async updateEntities(entity: string, body: any) {
     try {
       let result: any = await this.Http.put(`${this.uri}/${entity}/update`, body).toPromise();

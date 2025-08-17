@@ -33,6 +33,7 @@ let functions = {
     'grade_in_academic_periods/create': 'fx_ins_grade_in_academic_periods', 
     'students_in_grade/create': 'fx_ins_students_in_grade', 
     'courses_in_grade/create': 'fx_ins_courses_in_grade', 
+    'courses_in_grade/delete': 'fx_del_courses_in_grade', 
     'competences/create': 'fx_ins_competences', 
     'academic_period_details/create': 'fx_ins_academic_period_details', 
   },

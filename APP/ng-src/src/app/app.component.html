@@ -54,7 +54,7 @@
                               <span class="badge bg-primary me-2">
                                 {{p.code}}
                               </span>
-                              {{p.name}} <small>({{p.quantity}} meses)</small>
+                              {{p.name}} <small>({{p.quantity}} x año)</small>
                             </div>
                             <div class="col-5 text-end">
                               <button class="btn btn-sm btn-light text-success me-2" title="Configuración">
@@ -205,7 +205,7 @@
                             <div class="row">
                               <div class="col-2" *ngFor="let g of a.grades; let g_index = index">
                                 <div class="input-group input-group-sm">
-                                  <span class="input-group-text" [ngClass]="{'bg-primary text-white': g.selected}" id="basic-addon1" (click)="toggleSelectGrade(g)">
+                                  <span class="input-group-text" [ngClass]="{'bg-success text-white': g.selected}" id="basic-addon1" (click)="toggleSelectGrade(g)">
                                     <i class="fas fa-check me-1" *ngIf="g.selected"></i>
                                     {{g.abbr}} Grado
                                   </span>
@@ -592,7 +592,7 @@
             <input type="text" name="name" [(ngModel)]="newItem.name" class="form-control" required>
           </div>
           <div class="col-6">
-            <label for="quantity">Duración en Meses</label>
+            <label for="quantity">Cantidad en el Año</label>
             <input type="number" [min]="1" [max]="12" name="quantity" [(ngModel)]="newItem.quantity" class="form-control" required>
           </div>
           <div class="col-6">
@@ -783,7 +783,7 @@
         <div class="row">
           <div class="col-12">
             <div class="alert alert-light">
-              En esta sección podras visualizar los cursos por grado en el periodo academico seleccionado.
+              En esta sección podras visualizar los cursos por grado en el periodo academico seleccionado <strong class="text-danger">(Periodo Académico {{newItem.year}})</strong>.
             </div>
           </div>
           <div class="col-12">
@@ -794,9 +794,9 @@
                     {{g.abbr}} GRADO
                   </div>
                   <div class="col-6 text-end">
-                    <button class="btn btn-sm btn-primary" *ngIf="g.selected">
-                      <i class="fa fa-plus me-1"></i>Agregar Curso
-                    </button>
+                    <!-- <button class="btn btn-sm btn-primary" *ngIf="g.selected" (click)="saveItem('courses_in_grade')">
+                      <i class="fa fa-save me-1"></i>Guardar
+                    </button> -->
                   </div>
                 </div>
               </div>
@@ -817,27 +817,11 @@
                         <ul class="list-group">
                           <li class="list-group-item" *ngFor="let c of g.courses">
                             <div class="row">
-                              <div class="col-4">
+                              <div class="col-8">
                                 {{c.name}}
                               </div>
-                              <div class="col-1 text-center">
-                                <i class="fas fa-circle text-success" *ngIf="c.selected"></i>
-                              </div>
-                              <div class="col-5">
-                                <ul class="list-group" *ngIf="c.competences && c.competences.length">
-                                  <li class="list-group-item" *ngFor="let cm of c.competences">
-                                    {{cm.name}} <br>
-                                    <small>{{cm.description}}</small>
-                                  </li>
-                                </ul>
-                                <div class="text-center">
-                                  <button class="btn btn-light text-primary">
-                                    <i class="fas fa-plus me-1"></i>Agregar Competencia
-                                  </button>
-                                </div>
-                              </div>
-                              <div class="col-2">
-                                <button class="btn btn-sm" [ngClass]="{'btn-light text-success': !c.selected, 'btn-success': c.selected}">
+                              <div class="col-4 text-end">
+                                <button class="btn btn-sm btn-light" [ngClass]="{'text-success': !c.selected, 'text-danger': c.selected}" (click)="toggleAddCourse(c, g)">
                                   {{c.selected ? 'Quitar' : 'Seleccionar'}}
                                 </button>
                               </div>
