@@ -16,6 +16,9 @@ let functions = {
     'academic_periods/by': 'fx_sel_academic_periods',
     'grade_in_academic_periods/by': 'fx_sel_grade_in_academic_periods',
     'students_in_grade/by': 'fx_sel_students_in_grade',
+    'courses_in_grade/by': 'fx_sel_courses_in_grade',
+    'competences/by': 'fx_sel_competences',
+    'academic_period_details/by': 'fx_sel_academic_period_details',
     // POSTS
     'students/create': 'fx_ins_students',
     'attendances/create': 'fx_ins_attendances', 
@@ -29,6 +32,9 @@ let functions = {
     'academic_periods/create': 'fx_ins_academic_periods', 
     'grade_in_academic_periods/create': 'fx_ins_grade_in_academic_periods', 
     'students_in_grade/create': 'fx_ins_students_in_grade', 
+    'courses_in_grade/create': 'fx_ins_courses_in_grade', 
+    'competences/create': 'fx_ins_competences', 
+    'academic_period_details/create': 'fx_ins_academic_period_details', 
   },
   'PUT': {
     // ACTUALIZACIONES
@@ -44,6 +50,9 @@ let functions = {
     'academic_periods/update': 'fx_upd_academic_periods', 
     'grade_in_academic_periods/update': 'fx_upd_grade_in_academic_periods', 
     'students_in_grade/update': 'fx_upd_students_in_grade', 
+    'courses_in_grade/update': 'fx_upd_courses_in_grade', 
+    'competences/update': 'fx_upd_competences', 
+    'academic_period_details/update': 'fx_upd_academic_period_details', 
   }
 }
 

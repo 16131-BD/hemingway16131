@@ -54,7 +54,7 @@
                               <span class="badge bg-primary me-2">
                                 {{p.code}}
                               </span>
-                              {{p.name}} <small>({{p.duration_in_months}} meses)</small>
+                              {{p.name}} <small>({{p.quantity}} meses)</small>
                             </div>
                             <div class="col-5 text-end">
                               <button class="btn btn-sm btn-light text-success me-2" title="Configuración">
@@ -191,7 +191,7 @@
                       {{a.finish_date | date:'dd/MM/yyyy'}}
                     </div>
                     <div class="col text-end">
-                      <button class="btn btn-sm btn-light text-success me-2" title="Configuración" (click)="toggleSidebar('grade_in_academic_period')">
+                      <button class="btn btn-sm btn-light text-success me-2" *ngIf="a.withGrades" title="Configuración" (click)="toggleSidebar('grade_in_academic_period', a)">
                         <i class="fas fa-cog"></i>
                       </button>
                       <button class="btn btn-sm btn-light text-primary me-2" title="Edición" (click)="toggleSidebar('academic_period', a)">
@@ -526,7 +526,7 @@
             <strong *ngIf="newItem.typeSelected === 'grade'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Grado</strong>
             <strong *ngIf="newItem.typeSelected === 'period'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Periodo</strong>
             <strong *ngIf="newItem.typeSelected === 'course'">{{newItem.editing ? "Actualizar" : "Nuevo"}}&nbsp;Curso</strong>
-            <strong *ngIf="newItem.typeSelected === 'grade_in_academic_period'">Configuración de Periodo Académico&nbsp;Curso</strong>
+            <strong *ngIf="newItem.typeSelected === 'grade_in_academic_period'">Cursos por Grado en Periodo Académico</strong>
             <strong *ngIf="newItem.typeSelected === 'available_academic_period'">Habilitar Periodo Académico Actual</strong>
             <strong *ngIf="newItem.typeSelected === 'enrollment_student'">Matricular Estudiante</strong>
           </div>
@@ -592,8 +592,8 @@
             <input type="text" name="name" [(ngModel)]="newItem.name" class="form-control" required>
           </div>
           <div class="col-6">
-            <label for="duration_in_months">Duración en Meses</label>
-            <input type="number" [min]="1" [max]="12" name="duration_in_months" [(ngModel)]="newItem.duration_in_months" class="form-control" required>
+            <label for="quantity">Duración en Meses</label>
+            <input type="number" [min]="1" [max]="12" name="quantity" [(ngModel)]="newItem.quantity" class="form-control" required>
           </div>
           <div class="col-6">
             <label for="status">Estado</label>
@@ -776,6 +776,80 @@
             <button class="btn btn-sm btn-primary" [disabled]="enrollmentStudentForm.invalid" (click)="enrollmentStudent()">
               <i class="fa fa-save me-1"></i>Guardar
             </button>
+          </div>
+        </div>
+      </form>
+      <form #coursesInGrade="ngForm" *ngIf="newItem.typeSelected === 'grade_in_academic_period'">
+        <div class="row">
+          <div class="col-12">
+            <div class="alert alert-light">
+              En esta sección podras visualizar los cursos por grado en el periodo academico seleccionado.
+            </div>
+          </div>
+          <div class="col-12">
+            <div class="card mb-2" *ngFor="let g of newItem.grades">
+              <div class="card-header">
+                <div class="row">
+                  <div class="col-6 pt-1">
+                    {{g.abbr}} GRADO
+                  </div>
+                  <div class="col-6 text-end">
+                    <button class="btn btn-sm btn-primary" *ngIf="g.selected">
+                      <i class="fa fa-plus me-1"></i>Agregar Curso
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div class="card-body">
+                <div class="row">
+                  <div class="col-12 text-center" *ngIf="g.courses && !g.courses.length">
+                    <i class="fas fa-times"></i><br>
+                    No se tienen cursos registrados.
+                  </div>
+                  <div class="col-12" *ngIf="g.courses && g.courses.length">
+                    <div class="row">
+                      <div class="col-12" *ngIf="!g.selected">
+                        <span class="text-danger">
+                          Agrega el grado al Periodo
+                        </span>
+                      </div>
+                      <div class="col-12" *ngIf="g.selected">
+                        <ul class="list-group">
+                          <li class="list-group-item" *ngFor="let c of g.courses">
+                            <div class="row">
+                              <div class="col-4">
+                                {{c.name}}
+                              </div>
+                              <div class="col-1 text-center">
+                                <i class="fas fa-circle text-success" *ngIf="c.selected"></i>
+                              </div>
+                              <div class="col-5">
+                                <ul class="list-group" *ngIf="c.competences && c.competences.length">
+                                  <li class="list-group-item" *ngFor="let cm of c.competences">
+                                    {{cm.name}} <br>
+                                    <small>{{cm.description}}</small>
+                                  </li>
+                                </ul>
+                                <div class="text-center">
+                                  <button class="btn btn-light text-primary">
+                                    <i class="fas fa-plus me-1"></i>Agregar Competencia
+                                  </button>
+                                </div>
+                              </div>
+                              <div class="col-2">
+                                <button class="btn btn-sm" [ngClass]="{'btn-light text-success': !c.selected, 'btn-success': c.selected}">
+                                  {{c.selected ? 'Quitar' : 'Seleccionar'}}
+                                </button>
+                              </div>
+                            </div>
+                          </li>
+                        </ul>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </form>

@@ -2,11 +2,13 @@
 
 drop table if exists descriptive_conclusions;
 drop table if exists attendances;
+drop table if exists courses_in_grade;
 drop table if exists score_details;
 drop table if exists competences;
 drop table if exists scores;
 drop table if exists students_in_grade;
 drop table if exists grade_in_academic_periods;
+drop table if exists academic_period_details;
 drop table if exists academic_periods;
 drop table if exists periods;
 drop table if exists students;
@@ -79,7 +81,7 @@ create table periods(
 	id serial primary key,
 	code varchar(25),
 	name varchar(500),
-	duration_in_months int,
+	quantity int,
 	status bool default true,
 	created_at timestamp with time zone default current_date,
 	created_by int references persons(id),
@@ -92,7 +94,7 @@ comment on table periods is 'Tabla de registro de periodos académicos';
 comment on column periods.id is 'Llave primaria';
 comment on column periods.code is 'Código del periodo';
 comment on column periods.name is 'Nombre del Periodo';
-comment on column periods.duration_in_months is 'Duración en meses';
+comment on column periods.quantity is 'Cantidad';
 comment on column periods.status is 'Estado del periodo';
 comment on column periods.created_at is 'Fecha de Creación del periodo';
 comment on column periods.created_by is 'Persona que creó el registro (FK -> persons.id)';
@@ -225,6 +227,30 @@ comment on column academic_periods.created_at is 'Fecha de creación';
 comment on column academic_periods.created_by is 'Persona que creó el registro (FK -> persons.id)';
 comment on column academic_periods.updated_at is 'Fecha de Actualización del registro';
 
+
+create table academic_period_details(
+	id serial primary key,
+	academic_period_id int not null references academic_periods(id),
+	name varchar(500),
+	order int default 1,
+	status bool default true,
+	created_at timestamp with time zone default current_date,
+	created_by int references persons(id),
+	updated_at timestamp with time zone
+)
+with (
+	oids=false
+);
+comment on table academic_period_details is 'Tabla Detalle de registro de Detalle de Periodos Academicos';
+comment on column academic_period_details.id is 'Llave primaria';
+comment on column academic_period_details.academic_period_id is 'FK -> academic_periods(id)';
+comment on column academic_period_details.name is 'Nombre del detalle de detalle de periodo';
+comment on column academic_period_details.order is 'Orden';
+comment on column academic_period_details.status is 'Estado del registro (activo/inactivo)';
+comment on column academic_period_details.created_at is 'Fecha de creación';
+comment on column academic_period_details.created_by is 'Persona que creó el registro (FK -> persons.id)';
+comment on column academic_period_details.updated_at is 'Fecha de Actualización del registro';
+
 -- scores
 create table grades(
 	id serial primary key,
@@ -348,6 +374,7 @@ comment on column scores.updated_at is 'Fecha de Actualización del registro';
 -- COMPETENCES
 create table competences(
 	id serial primary key,
+	courses_in_grade_id int not null references courses_in_grade(id),
 	name varchar(500),
 	description varchar(5000),
 	status bool default true,
@@ -360,6 +387,7 @@ with (
 );
 comment on table competences is 'Tabla de registro de competencias de evaluación';
 comment on column competences.id is 'Llave primaria';
+comment on column competences.courses_in_grade_id is 'FK -> courses_in_grade.id';
 comment on column competences.name is 'Nombre de Competencia';
 comment on column competences.description is 'Descripción de Competencia';
 comment on column competences.status is 'Estado del registro (activo/inactivo)';

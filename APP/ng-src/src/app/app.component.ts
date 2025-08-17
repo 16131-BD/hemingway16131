@@ -86,6 +86,8 @@ export class AppComponent implements OnInit {
   gradeInAcademicPeriods: any[] = [];
   courses: any[] = [];
   studentsInGrade: any[] = [];
+  coursesInGrade: any[] = [];
+  competences: any[] = [];
   academicPeriods: any[] = [];
   currentAcademicPeriod: any;
   studentToEnrollment: any;
@@ -132,6 +134,13 @@ export class AppComponent implements OnInit {
   async getStudentsInGrade() {
     let result: any = await this.MainAPI.getEntitiesBy('students_in_grade', {filter: [{}]});
     this.studentsInGrade = result.data;
+
+    let resultCourses: any = await this.MainAPI.getEntitiesBy('courses_in_grade', {filter: [{}]});
+    this.coursesInGrade = resultCourses.data;
+
+    let resultCompetences: any = await this.MainAPI.getEntitiesBy('competences', {filter: [{}]});
+    this.competences = resultCompetences.data;
+
     this.getGrades();
   }
 
@@ -169,8 +178,24 @@ export class AppComponent implements OnInit {
           g.grade_in_academic_period_id = gradeWithData.id;
         }
       });
+      a.withGrades = a.grades.filter((g: any) => g.grade_in_academic_period_id).length > 0;
       a.grades.map((g: any) => {
         g.students = this.studentsInGrade.filter((s: any) => s.grade_in_academic_period_id === g.grade_in_academic_period_id);
+      });
+
+      a.grades.map((g: any) => {
+        g.courses = JSON.parse(JSON.stringify(this.courses));
+        g.courses.map((c: any) => {
+          let courseInGradeFound: any = this.coursesInGrade.find((x: any) => x.grade_in_academic_period_id === g.grade_in_academic_period_id && x.course_id === c.id);
+          if (courseInGradeFound) {
+            c.courses_in_grade_id = courseInGradeFound.id;
+            c.selected = true;
+          }
+        });
+        // g.courses = this.coursesInGrade.filter((s: any) => s.grade_in_academic_period_id === g.grade_in_academic_period_id);
+        g.courses.filter((x: any) => x.courses_in_grade_id).map((c: any) => {
+          c.competences = this.competences.filter((cm: any) => cm.courses_in_grade_id === c.courses_in_grade_id);
+        });
       });
     });
     this.getInitialVarsToEnrollment();
@@ -218,6 +243,8 @@ export class AppComponent implements OnInit {
         this.newItem.editing = true;
       }
       this.newItem.typeSelected = type;
+    } else {
+      this.newItem = {};
     }
     
   }
