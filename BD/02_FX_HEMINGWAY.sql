@@ -2943,7 +2943,7 @@ BEGIN
         apd.id,
         apd.academic_period_id,
         apd.name,
-        apd.order,
+        apd.order_num,
         apd.status,
         apd.created_at,
         apd.created_by,
@@ -2954,7 +2954,7 @@ BEGIN
         (f.id IS NULL OR apd.id = f.id)
         AND (f.academic_period_id IS NULL OR apd.academic_period_id = f.academic_period_id)
         AND (f.name IS NULL OR apd.name ILIKE '%' || f.name || '%')
-        AND (f.order_num IS NULL OR apd.order = f.order_num)
+        AND (f.order_num IS NULL OR apd.order_num = f.order_num)
         AND (f.status IS NULL OR apd.status = f.status)
         AND (f.created_by IS NULL OR apd.created_by = f.created_by)
         AND (f.created_at IS NULL OR DATE(apd.created_at) = DATE(f.created_at));

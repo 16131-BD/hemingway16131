@@ -150,7 +150,7 @@ create table attendances(
 	student_id int references students(id),
 	created_at timestamp with time zone,
 	obs varchar(5000),
-	status int,
+	status int not null references types(id),
 	created_by int references persons(id),
 	updated_at timestamp with time zone
 )
@@ -232,7 +232,7 @@ create table academic_period_details(
 	id serial primary key,
 	academic_period_id int not null references academic_periods(id),
 	name varchar(500),
-	order int default 1,
+	order_num int default 1,
 	status bool default true,
 	created_at timestamp with time zone default current_date,
 	created_by int references persons(id),
@@ -245,13 +245,13 @@ comment on table academic_period_details is 'Tabla Detalle de registro de Detall
 comment on column academic_period_details.id is 'Llave primaria';
 comment on column academic_period_details.academic_period_id is 'FK -> academic_periods(id)';
 comment on column academic_period_details.name is 'Nombre del detalle de detalle de periodo';
-comment on column academic_period_details.order is 'Orden';
+comment on column academic_period_details.order_num is 'Orden';
 comment on column academic_period_details.status is 'Estado del registro (activo/inactivo)';
 comment on column academic_period_details.created_at is 'Fecha de creación';
 comment on column academic_period_details.created_by is 'Persona que creó el registro (FK -> persons.id)';
 comment on column academic_period_details.updated_at is 'Fecha de Actualización del registro';
 
--- scores
+-- grades
 create table grades(
 	id serial primary key,
 	abbr varchar(50),
@@ -349,6 +349,7 @@ comment on column students_in_grade.updated_at is 'Fecha de Actualización del r
 create table scores(
 	id serial primary key,
 	courses_in_grade_id int not null references courses_in_grade(id),
+	academic_period_details_id int not null references academic_period_details(id),
 	students_in_grade_id int not null references students_in_grade(id),
 	score numeric(5,2),
 	obs varchar(5000),
@@ -363,6 +364,7 @@ with (
 comment on table scores is 'Tabla de registro de calificaciones por estudiante y periodo';
 comment on column scores.id is 'Llave primaria';
 comment on column scores.courses_in_grade_id is 'FK -> courses_in_grade.id (Código del Curso en Grado de Periodo Academico)';
+comment on column scores.academic_period_details_id is 'FK -> academic_period_details.id (Código del Curso en Grado de Periodo Academico)';
 comment on column scores.students_in_grade_id is 'FK -> students_in_grade.id (Código del Estudiante)';
 comment on column scores.score is 'Nota (0-20)';
 comment on column scores.obs is 'Observaciones';
@@ -374,6 +376,7 @@ comment on column scores.updated_at is 'Fecha de Actualización del registro';
 -- COMPETENCES
 create table competences(
 	id serial primary key,
+	academic_period_details_id int not null references academic_period_details(id),
 	courses_in_grade_id int not null references courses_in_grade(id),
 	name varchar(500),
 	description varchar(5000),
